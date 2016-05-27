@@ -1,15 +1,15 @@
 function out=parse_aes(varargin)
-%Parse input to generate esthetics structure
+%# Parse input to generate esthetics structure
 p=inputParser;
 
-% x and y are mandatory first two arguments
+%# x and y are mandatory first two arguments
 my_addParameter (p, 'x', []);
 my_addParameter (p, 'y', []);
 my_addParameter (p, 'ymin', []);
 my_addParameter (p, 'ymax', []);
 my_addParameter (p, 'z', []);
 
-% Other aesthetics are string-value pairs
+%# Other aesthetics are string-value pairs
 my_addParameter (p, 'color', []);
 my_addParameter (p, 'lightness', []);
 my_addParameter (p, 'group', []);
@@ -21,8 +21,8 @@ my_addParameter (p, 'row', []);
 my_addParameter (p, 'column', []);
 
 parse(p,varargin{:});
-
-%Make everyone column arrays
+keyboard
+%# Make everyone column arrays
 for pr=(1:length(p.Parameters))
     %# By doing the test with isrow, we prevent shifting things that could be
     %# in 2D such as X and Y
