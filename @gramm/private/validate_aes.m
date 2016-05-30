@@ -47,8 +47,7 @@ for k = (1:length (fields))
                                %# Convert categorical data to cellstr.
     if (exist ('OCTAVE_VERSION', 'builtin'))
                                 %# poor man iscategorical
-      if (issorted (aes.(fields{k})) && ...
-          length (aes.(fields{k})) == length (unique (aes.(fields{k}))))
+      if (isa(aes.(fields{k}), 'categorical'))
         out.(fields{k}) = cellstr (out.(fields{k}));
       end
     else

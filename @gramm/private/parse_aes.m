@@ -20,8 +20,8 @@ my_addParameter (p, 'subset', []);
 my_addParameter (p, 'row', []);
 my_addParameter (p, 'column', []);
 
-parse(p,varargin{:});
-keyboard
+parse (p, varargin{:});
+%# keyboard
 %# Make everyone column arrays
 for pr=(1:length(p.Parameters))
     %# By doing the test with isrow, we prevent shifting things that could be

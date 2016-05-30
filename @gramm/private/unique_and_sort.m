@@ -24,8 +24,7 @@ function y=unique_and_sort(x,sortopts)
   %# Clean up uniques
   if (~iscell (x))
     if (exist ('OCTAVE_VERSION', 'builtin'))
-      if (~issorted (y) || ...
-          length (y) ~= length (unique (y)))
+      if (~isa (y, 'categorical'))
         y(isnan(y)) = []; % remove all nans
       end
     else
