@@ -224,28 +224,5 @@ classdef gramm < matlab.mixin.Copyable
         end
         
     end
-    
 
-    
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

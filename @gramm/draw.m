@@ -431,7 +431,7 @@ for ind_row = (1:length (uni_row))
                 draw_data.dodge_n = dodge_data.n(sel_dodge);
                 
                                 %Loop over groups
-                for ind_group=1:length(uni_group)
+                for ind_group = (1:length (uni_group))
                   
                   sel = sel_lightness & multi_sel (temp_aes.group, uni_group{ind_group});
                   
@@ -481,13 +481,16 @@ for ind_row = (1:length (uni_row))
                     draw_data.color_index = (ind_color-1)*length(uni_lightness)+ind_lightness;
                     draw_data.n_colors = length(uni_color)*length(uni_lightness);
                     
-                                % Loop over geoms
+                    % Loop over geoms
                     for geom_ind = (1:length (obj.geom))
                                 % Call each geom !
+                      keyboard
                       obj.geom{geom_ind}(draw_data);
                     end
                     obj.firstrun(obj.current_row, obj.current_column) = 0;
-                    draw_data = rmfield (draw_data, {'x', 'y', 'z', 'continuous_color', 'color_index', 'n_colors'});
+                    draw_data = rmfield (draw_data, ...
+                                         {'x', 'y', 'z', continuous_color', ...
+                                          'color_index', 'n_colors'});
                     obj.results.draw_data{obj.result_ind} = draw_data;
                     
                                 % Iterate loop counter
