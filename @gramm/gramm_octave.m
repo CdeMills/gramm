@@ -247,7 +247,15 @@ classdef gramm < handle
         end
       end
     end
+
+    obj = update (obj, varargin)
+         
+    obj = facet_grid (obj, row, col, varargin)
+    obj = facet_wrap (obj, col, varargin)
     
+    obj = redraw(obj, spacing, display)
+    obj = draw(obj, do_redraw)
+
     function obj = set_parent (obj, parent)
       obj.parent = parent;
     end

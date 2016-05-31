@@ -14,7 +14,6 @@ function obj=draw(obj,do_redraw)
 % axis placement.
 
 % We set redraw() as resize callback by default
-%# keyboard
 if (nargin < 2)
   do_redraw = true;
 end
@@ -22,7 +21,7 @@ end
 % If no parent was given we use the current figure
 if (isempty (obj(1).parent))
     for obj_ind = (1:numel(obj))
-        obj(obj_ind).parent = gcf ();
+        set_parent(obj(obj_ind), gcf ());
     end
 end
 
@@ -484,12 +483,11 @@ for ind_row = (1:length (uni_row))
                     % Loop over geoms
                     for geom_ind = (1:length (obj.geom))
                                 % Call each geom !
-                      keyboard
                       obj.geom{geom_ind}(draw_data);
                     end
                     obj.firstrun(obj.current_row, obj.current_column) = 0;
                     draw_data = rmfield (draw_data, ...
-                                         {'x', 'y', 'z', continuous_color', ...
+                                         {'x', 'y', 'z', 'continuous_color', ...
                                           'color_index', 'n_colors'});
                     obj.results.draw_data{obj.result_ind} = draw_data;
                     
