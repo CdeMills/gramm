@@ -333,8 +333,17 @@ end
 end
 
 function [ymean,yci]=computeci(y,type)
+try
+  ymean = nanmean (y);
+catch
+  if (isvector (y))
+    y(~isnan(y));
+    ymean = sum (ans) / (length (ans) - 1);
+  else
+    error ('nanmean not implemented');
+  end
+end
 
-ymean = nanmean (y);
 try
   switch type
     case 'bootci'

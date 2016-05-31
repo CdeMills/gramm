@@ -58,7 +58,12 @@ for ind_x=1:length(uni_x)
     ysel=y(abs(x-uni_x(ind_x))<1e-10);
     
     %Quartiles
-    temp=prctile(ysel,[25 50 75]);
+    if (exist ('OCTAVE_VERSION', 'builtin'))
+      temp = prctile (ysel, [25 50 75]);
+      temp = temp(:).'; %# force row vector
+    else
+      temp=prctile(ysel,[25 50 75]);
+    end
     
     %Outlier limits at 1.5 Inter Quartile Range
     p(ind_x,:)=[temp(1)-1.5*(temp(3)-temp(1)) , temp , temp(3)+1.5*(temp(3)-temp(1))];
