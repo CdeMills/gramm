@@ -369,8 +369,12 @@ for ind_row = (1:length (uni_row))
       end
       
                                 % Make axes current
-      axes (obj.facet_axes_handles(ind_row, ind_column));
-      
+      try
+        axes (obj.facet_axes_handles(ind_row, ind_column));
+      catch
+        disp ('Bug 47241 ???');
+        keyboard
+      end
       hold on;
       
               % Store all the X used for the current facet (useful for

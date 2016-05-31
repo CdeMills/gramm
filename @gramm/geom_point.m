@@ -1,10 +1,9 @@
-function obj=geom_point(obj,varargin)
+function obj = geom_point(obj, varargin)
 % geom_point Display data as points
 %
 % This will add a layer that will display data as points
 
 p = inputParser ();
-keyboard
 my_addParameter (p, 'dodge', 0);
 parse(p, varargin{:});
 
@@ -13,7 +12,7 @@ obj.results.geom_point_handle = {};
 end
 
 function hndl = my_point(obj, draw_data, params)
-keyboard
+
 if (obj.continuous_color)
   if (iscell (draw_data.x))
     [x, y] = to_polar (obj, draw_data.x, draw_data.y);

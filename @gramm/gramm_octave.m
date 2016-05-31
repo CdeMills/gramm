@@ -256,6 +256,43 @@ classdef gramm < handle
     obj = redraw(obj, spacing, display)
     obj = draw(obj, do_redraw)
 
+    % Customization methods
+    obj = set_polar (obj, varargin)
+    obj = set_color_options (obj, varargin)
+    obj = set_order_options (obj, varargin)
+    obj = set_continuous_color (obj, varargin)
+    obj = no_legend (obj)
+    obj = set_limit_extra (obj, x_extra, y_extra, z_extra)
+    obj = axe_property (obj, varargin)
+    obj = set_datetick (obj, varargin)
+    obj = set_title (obj, title, varargin)
+    obj = set_names (obj, varargin)
+    
+    % geom  methods
+    obj = geom_line (obj, varargin)
+    obj = geom_point (obj, varargin)
+    obj = geom_count (obj, varargin)
+    obj = geom_jitter (obj, varargin)
+    obj = geom_abline (obj, varargin)
+    obj = geom_vline (obj, varargin)
+    obj = geom_hline (obj, varargin)
+    obj = geom_funline (obj, varargin)
+    obj = geom_raster (obj, varargin)
+    obj = geom_bar (obj, varargin)
+    obj = geom_interval (obj, varargin)
+    
+    % stat methods
+    obj = stat_smooth (obj, varargin)
+    obj = stat_summary (obj, varargin)
+    obj = stat_boxplot (obj, varargin)
+    obj = stat_ellipse (obj, varargin)
+    obj = stat_glm (obj, varargin)
+    obj = stat_fit (obj, varargin)
+    obj = stat_bin (obj, varargin)
+    obj = stat_bin2d (obj, varargin)
+    obj = stat_density (obj, varargin)
+    obj = stat_qq (obj, varargin)
+        
     function obj = set_parent (obj, parent)
       obj.parent = parent;
     end
