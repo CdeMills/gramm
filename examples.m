@@ -918,48 +918,48 @@ draw(g);
 % (>15), or when set_continuous_color is used, gramm switches from a
 % categorical color scale to a gradient-based continuous color scale.
 
-load spectra.mat
+try
+  load spectra.mat
 
 %Here we create x as a 1xN array (see example above), and use a MxN matrix
 %for y. Color applies to the M rows of y.
-g18=gramm('x',900:2:1700,'y',NIR,'color',octane);
-g18.set_names('x','Wavelength (nm)','y','NIR','color','Octane');
-g18.set_continuous_color('colormap','hot');
-g18.geom_line;
-figure('Position',[100 100 800 450]);
-g18.draw();
-
+  g18=gramm('x',900:2:1700,'y',NIR,'color',octane);
+  g18.set_names('x','Wavelength (nm)','y','NIR','color','Octane');
+  g18.set_continuous_color('colormap','hot');
+  g18.geom_line;
+  figure('Position',[100 100 800 450]);
+  g18.draw();
+  
 %% Changing the order of elements with set_order_options()
 % By default, gramm uses grouping data in increasing order of the group
 % value (alphabetical for cellstr, numerical for arrays). Using
 % set_order_options(), it is possible to fine tweak the orders of color,
 % lightness, facet rows and columns, as well as categorical X
 
-y=[36 38 40 42 44 46];
-x={'XS' 'S' 'M' 'L' 'XL' 'XXL'};
-
-
-clear g
+  y=[36 38 40 42 44 46];
+  x={'XS' 'S' 'M' 'L' 'XL' 'XXL'};
+  
+    clear g
 %By default, both x and lightness are ordered according to sorted (here
 %alphabetically) input
-g(1,2)=gramm('x',x,'y',y,'lightness',x);
-g(1,2).stat_summary('geom','bar','dodge',0);
-g(1,2).set_title('Default output');
+    g(1,2)=gramm('x',x,'y',y,'lightness',x);
+    g(1,2).stat_summary('geom','bar','dodge',0);
+    g(1,2).set_title('Default output');
 
 %By using set_order_options('x',0), x are presented in the raw input order. The
 %color is still sorted
-g(2,1)=gramm('x',x,'y',y,'lightness',x);
-g(2,1).stat_summary('geom','bar','dodge',0);
-g(2,1).set_order_options('x',0);
-g(2,1).set_title('x in input order');
+    g(2,1)=gramm('x',x,'y',y,'lightness',x);
+    g(2,1).stat_summary('geom','bar','dodge',0);
+    g(2,1).set_order_options('x',0);
+    g(2,1).set_title('x in input order');
 
 %By using set_order_options('x',0,'lightness',{'XS' 'S' 'M' 'L' 'XL'
 %'XXL'}), we also order lightness in the desired order, here by
 %directly providing the desired order.
-g(2,2)=gramm('x',x,'y',y,'lightness',x);
-g(2,2).stat_summary('geom','bar','dodge',0);
-g(2,2).set_order_options('x',0,'lightness',{'XS' 'S' 'M' 'L' 'XL' 'XXL'});
-g(2,2).set_title({'x in input order' 'lightness in custom order'});
+    g(2,2)=gramm('x',x,'y',y,'lightness',x);
+    g(2,2).stat_summary('geom','bar','dodge',0);
+    g(2,2).set_order_options('x',0,'lightness',{'XS' 'S' 'M' 'L' 'XL' 'XXL'});
+    g(2,2).set_title({'x in input order' 'lightness in custom order'});
 %Examples below properly fail
 %g(2,2).set_order_options('x',0,'lightness',{'XXL' 'XL' 'L' 'M' 'S' 'B'})
 %g(2,2).set_order_options('x',0,'lightness',{'XXL' 'XL' 'L' 'M' 'S' 1})
@@ -969,18 +969,19 @@ g(2,2).set_title({'x in input order' 'lightness in custom order'});
 %input), here used to inverse lightness map. This way is a bit more
 %practical for floating point numerical variables. For cells of string, the
 %way above is easier.
-g(2,3)=gramm('x',x,'y',y,'lightness',x);
-g(2,3).stat_summary('geom','bar','dodge',0);
-g(2,3).set_order_options('x',0,'lightness',[6 4 1 2 3 5]);
-g(2,3).set_title({'x in input order' 'lightness in custom order'});
+    g(2,3)=gramm('x',x,'y',y,'lightness',x);
+    g(2,3).stat_summary('geom','bar','dodge',0);
+    g(2,3).set_order_options('x',0,'lightness',[6 4 1 2 3 5]);
+    g(2,3).set_title({'x in input order' 'lightness in custom order'});
 %Exampel below properly fail
 %g(2,3).set_order_options('x',0,'lightness',[6 4 1 2 3 3])
 
-g.set_names('x','US size','y','EU size','lightness','US size');
-g.axe_property('YLim',[0 48]);
+    g.set_names('x','US size','y','EU size','lightness','US size');
+    g.axe_property('YLim',[0 48]);
 
-figure('Position',[100 100 800 600]);
-g.draw();
+    figure('Position',[100 100 800 600]);
+    draw(g);
+end
 
 %% Advanced customization of gramm figures
 % The options for the geom_ and stat_ methods, as well as the
@@ -1027,10 +1028,11 @@ text(75.3,47,'Important event','Parent',g.facet_axes_handles(1));
 %It's also possible to change properties of graphical elements
 %Either all at once
 set([g.results.geom_point_handle],'MarkerSize',5);
-set([g.results.stat_glm.area_handle],'FaceColor',[0.4 0.4 0.4]);
+if (isfield (g.results, 'stat_glm'))
+  set([g.results.stat_glm.area_handle],'FaceColor',[0.4 0.4 0.4]);
 %Or on a subset of them (here only for the lines of glms of 4-cylinder cars)
-set([g.results.stat_glm(g.results.color==4).line_handle],'LineWidth',3);
-
+  set([g.results.stat_glm(g.results.color==4).line_handle],'LineWidth',3);
+end
 
 %% Using different input formats for x and y (1D arrays, cells of arrays, 2D arrays)
 % Standard ggplot-like input (arrays for everything)
