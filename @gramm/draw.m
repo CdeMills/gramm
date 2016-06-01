@@ -354,7 +354,6 @@ for ind_row = (1:length (uni_row))
               obj.facet_axes_handles(ind_row, ind_column) = mysubplot (length (uni_row), length (uni_column), ind_row, ind_column);
             end
          % And we copy the contents of the first facet in the new ones
-            keyboard
             copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
           end
                    % else

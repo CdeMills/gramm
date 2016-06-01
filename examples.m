@@ -900,17 +900,18 @@ g(2,3).set_title('Color Brewer 2','FontSize',12);
 %Some methods can be called on all objects at the same time !
 try
   g.axe_property('YLim',[0 140]);
+  g.axe_property('XTickLabelRotation',60); %Should work for recent Matlab versions
+  g.set_names('x','Origin','y','Horsepower','color','Origin','lightness','Origin');
+  g.set_title('Colormap customizations examples');
 catch
-keyboard
-  g = g(1, 1);
-  g.axe_property('YLim',[0 140]);
+  axe_property(g, 'YLim',[0 140]);
+  axe_property(g, 'XTickLabelRotation',60); %Should work for recent Matlab versions
+  set_names(g, 'x','Origin','y','Horsepower','color','Origin','lightness','Origin');
+  set_title(g, 'Colormap customizations examples');
 end
-g.axe_property('XTickLabelRotation',60); %Should work for recent Matlab versions
-g.set_names('x','Origin','y','Horsepower','color','Origin','lightness','Origin');
-g.set_title('Colormap customizations examples');
 
 figure('Position',[100 100 800 600])
-g.draw();
+draw(g);
 
 %% Using a continuous color scale
 % When the variable provided as 'color' contains too many different values
@@ -944,7 +945,6 @@ clear g
 g(1,2)=gramm('x',x,'y',y,'lightness',x);
 g(1,2).stat_summary('geom','bar','dodge',0);
 g(1,2).set_title('Default output');
-
 
 %By using set_order_options('x',0), x are presented in the raw input order. The
 %color is still sorted

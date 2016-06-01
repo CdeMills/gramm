@@ -175,6 +175,10 @@ classdef gramm < handle
     function obj=__set_color_option(obj, vals)
       obj.color_options = vals;
     end
+
+    function obj=__set_axe_properties(obj, name, value)
+      obj.axe_properties = vertcat (obj.axe_properties, {name, value});
+    end
     
   end
     
