@@ -19,82 +19,85 @@ function obj=stat_fit(obj,varargin)
 %   being displayed over the range of x values used for the fit
 % - 'disp_fit': set to true to display the fitted parameters
 
-p=inputParser;
-my_addParameter(p,'fun',@(a,b,x)a*x+b);
-my_addParameter(p,'StartPoint',[]);
-my_addParameter(p,'intopt','observation');
-my_addParameter(p,'geom','area');
-my_addParameter(p,'fullrange',false);
-my_addParameter(p,'disp_fit',false);
-parse(p,varargin{:});
-obj.geom=vertcat(obj.geom,{@(dd)my_fit(obj,dd,p.Results)});
-obj.results.stat_fit={};
+  if (~exist ('fit'))
+    disp ('Statistical function fit seems not available');
+    return;
+  end
+
+  p = inputParser;
+  my_addParameter (p, 'fun', @(a,b,x) a*x+b);
+  my_addParameter (p, 'StartPoint', []);
+  my_addParameter (p, 'intopt', 'observation');
+  my_addParameter (p, 'geom', 'area');
+  my_addParameter (p, 'fullrange', false);
+  my_addParameter (p, 'disp_fit', false);
+  parse (p, varargin{:});
+  obj.geom = vertcat(obj.geom, {@(dd) my_fit(obj, dd, p.Results)});
+  obj.results.stat_fit = {};
 end
 
+function hndl=my_fit(obj, draw_data, params)
 
-
-function hndl=my_fit(obj,draw_data,params)
-
-combx=comb(draw_data.x)';
-comby=comb(draw_data.y)';
-
-%Remove NaNs
-sel=~isnan(combx) & ~isnan(comby);
-combx=combx(sel);
-comby=comby(sel);
-
-%Do the fit depending on options
-if isempty(params.StartPoint)
-    mdl=fit(combx',comby',params.fun);
-else
-    mdl=fit(combx',comby',params.fun,'StartPoint',params.StartPoint);
-end
+  combx=comb(draw_data.x)';
+  comby=comb(draw_data.y)';
+  
+  %Remove NaNs
+  sel=~isnan(combx) & ~isnan(comby);
+  combx=combx(sel);
+  comby=comby(sel);
+  
+  %Do the fit depending on options
+  if (isempty (params.StartPoint))
+    mdl = fit (combx', comby', params.fun);
+  else
+    mdl = fit (combx', comby', params.fun, 'StartPoint', params.StartPoint);
+  end
 
 %Create x values for the fit plot
-if params.fullrange
-    newx=linspace(obj.var_lim.minx,obj.var_lim.maxx,100)';
-else
-    newx=linspace(min(combx),max(combx),100)';
-end
-%Get fit value and CI
-newy=feval(mdl,newx);
-yci=predint(mdl,newx,0.95,params.intopt);
+  if (params.fullrange)
+    newx = linspace (obj.var_lim.minx, obj.var_lim.maxx, 100)';
+  else
+    newx = linspace (min (combx), max (combx), 100)';
+  end
+ %Get fit value and CI
+  newy = feval (mdl, newx);
+  yci = predint(mdl, newx, 0.95, params.intopt);
 
 
-obj.results.stat_fit{obj.result_ind,1}.x=newx;
-obj.results.stat_fit{obj.result_ind,1}.y=newy;
-obj.results.stat_fit{obj.result_ind,1}.yci=yci;
-obj.results.stat_fit{obj.result_ind,1}.model=mdl;
+  obj.results.stat_fit{obj.result_ind,1}.x=newx;
+  obj.results.stat_fit{obj.result_ind,1}.y=newy;
+  obj.results.stat_fit{obj.result_ind,1}.yci=yci;
+  obj.results.stat_fit{obj.result_ind,1}.model=mdl;
+  
+  % Plot fit
+  hndl=plotci(obj,newx,newy,yci,draw_data,params.geom);
 
-%Plot fit
-hndl=plotci(obj,newx,newy,yci,draw_data,params.geom);
-
-%Store plotted handles
-hnames=fieldnames(hndl);
-for k=1:length(hnames)
+ % Store plotted handles
+ hnames=fieldnames(hndl);
+ for k=(1:length(hnames))
     obj.results.stat_fit{obj.result_ind,1}.(hnames{k})=hndl.(hnames{k});
-end
+ end
 
-%Do we display the results ?
-if params.disp_fit
+  % Do we display the results ?
+ if (params.disp_fit)
     %Set Y position of display
-    if obj.firstrun(obj.current_row,obj.current_column)
-        obj.extra.mdltext(obj.current_row,obj.current_column)=0.05;
+    if (obj.firstrun(obj.current_row, obj.current_column))
+      obj.extra.mdltext(obj.current_row,obj.current_column)=0.05;
     else
-        obj.extra.mdltext(obj.current_row,obj.current_column)=obj.extra.mdltext(obj.current_row,obj.current_column)+0.03;
+      obj.extra.mdltext(obj.current_row,obj.current_column)=obj.extra.mdltext(obj.current_row,obj.current_column)+0.03;
     end
     %Get formula and parameters
-    form=formula(mdl);
-    cvals=coeffvalues(mdl);
-    cnames=coeffnames(mdl);
+    form = formula(mdl);
+    cvals = coeffvalues(mdl);
+    cnames = coeffnames(mdl);
     %Replace parameter names by their value in the formula
-    for c=1:length(cnames)
-        form=strrep(form,cnames{c},num2str(cvals(c),2));
+    for c=(1:length (cnames))
+        form = strrep(form, cnames{c}, num2str(cvals(c), 2));
     end
-    obj.results.stat_fit{obj.result_ind,1}.text_handle=text('Units','normalized','Position',[0.1 obj.extra.mdltext(obj.current_row,obj.current_column)],'color',draw_data.color,...
-        'String',form);
-end
-
-
+    obj.results.stat_fit{obj.result_ind,1}.text_handle...
+    = text('Units', 'normalized', 'Position', ...
+           [0.1 obj.extra.mdltext(obj.current_row,obj.current_column)],...
+           'color', draw_data.color, 'String', form);
+ end
 
 end

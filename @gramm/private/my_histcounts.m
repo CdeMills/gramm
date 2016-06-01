@@ -1,4 +1,4 @@
-function [n, ind]=my_histcounts(X,edges,normalization)
+function [n, ind]=my_histcounts(X, edges, normalization)
   persistent old_matlab;
 
   if (exist ('OCTAVE_VERSION', 'builtin'))
@@ -21,7 +21,7 @@ function [n, ind]=my_histcounts(X,edges,normalization)
         n = n./sum (n);
       case 'count'
       otherwise
-        warning ('Other types of normalization are not supported on older Matlab versions')
+        warning (sprintf ('Normalization %s not supported in histc on older Matlab / Octave versions', normalization));
     end
   else
     [n, ~, ind] = histcounts (X, edges, 'Normalization', normalization);

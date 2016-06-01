@@ -38,6 +38,10 @@ end
 %             inCallback = true;
 
 %If x is empty the object probably is so we skip (happens for multiple graphs)
+if (isempty (obj.aes))
+  return
+end
+
 if (isempty (obj.aes.x))
   return
 end

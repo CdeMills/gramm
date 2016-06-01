@@ -13,120 +13,126 @@ function obj=stat_ellipse(obj,varargin)
 % pairs in a cell array (as if those were options for Matlab's
 % built in patch() function)
 
-p=inputParser;
-my_addParameter(p,'type','95percentile'); %ci
-my_addParameter(p,'geom','area'); %line
-my_addParameter(p,'patch_opts',{});
-parse(p,varargin{:});
+  if (~exist ('surf2patch'))
+    disp ('Graphical function surf2patch seems not available');
+    return;
+  end
+  p = inputParser;
+  my_addParameter (p, 'type', '95percentile'); %ci
+  my_addParameter (p, 'geom', 'area'); %line
+  my_addParameter (p, 'patch_opts', {});
+  parse (p, varargin{:});
 
-obj.geom=vertcat(obj.geom,{@(dd)my_ellipse(obj,dd,p.Results)});
-obj.results.stat_ellipse={};
+  obj.geom = vertcat(obj.geom, {@(dd) my_ellipse (obj, dd, p.Results)});
+  obj.results.stat_ellipse = {};
 end
-
 
 function hndl=my_ellipse(obj,draw_data,params)
 
+  persistent elpoints;
+  persistent sphpoints;
+  
+  % Cache unity ellipse points
+  if (isempty (elpoints))
+    res = 30;
+    ang = 0:pi/(0.5*res):2*pi;
+    elpoints = [cos(ang); sin(ang)];
+    [x,y,z] = sphere (10);
+    sphpoints = surf2patch (x,y,z);
+  end
+  
+  combx = shiftdim (comb (draw_data.x));
+  comby = shiftdim (comb (draw_data.y));
+  combz = shiftdim (comb (draw_data.z));
 
-persistent elpoints;
-persistent sphpoints;
-
-%Cache unity ellipse points
-if isempty(elpoints)
-    res=30;
-    ang=0:pi/(0.5*res):2*pi;
-    elpoints=[cos(ang); sin(ang)];
-    [x,y,z]=sphere(10);
-    sphpoints=surf2patch(x,y,z);
-end
-
-combx=shiftdim(comb(draw_data.x));
-comby=shiftdim(comb(draw_data.y));
-combz=shiftdim(comb(draw_data.z));
-
-%If we have "enough" points
-if sum(~isnan(combx))>2 && sum(~isnan(comby))>2
+  % If we have "enough" points
+  if (sum (~isnan (combx)) > 2 && sum (~isnan (comby)) > 2)
     
-    if isempty(draw_data.z)
+    if (isempty (draw_data.z))
+      
+      r = [combx comby];
+        % Using a chi square with 2 degrees of freedom is proper
+        % here (tested: generated ellipse do contain 1-alpha of the
+        % points)
+      k = @(alpha) sqrt(chi2inv(1-alpha, 2));
+      
+    % If a CI on the mean is requested, we replace the original points
+    % with bootstrapped mean samples
+      if (strcmp (params.type, 'ci'))
+        r = bootstrp (1000, @nanmean,r);
+      end
         
+        % Extract mean and covariance
+      m = nanmean (r);
+      cv = nancov (r);
         
-        r=[combx comby];
-        %Using a chi square with 2 degrees of freedom is proper
-        %here (tested: generated ellipse do contain 1-alpha of the
-        %points)
-        k=@(alpha) sqrt(chi2inv(1-alpha,2));
-        
-        
-        %If a CI on the mean is requested, we replace the original points
-        %with bootstrapped mean samples
-        if strcmp(params.type,'ci')
-            r=bootstrp(1000,@nanmean,r);
-        end
-        
-        %Extract mean and covariance
-        m=nanmean(r);
-        cv=nancov(r);
-        
-        
-        %Compute ellipse points
-        conf_elpoints=sqrtm(cv)*elpoints*k(0.05);
-        
-        %Compute ellipse axes
-        [evec,eval]=eig(cv);
-        if eval(2,2)>eval(1,1) %Reorder
-            evec=fliplr(evec);
-            eval=fliplr(flipud(eval));
-        end
-        elaxes=sqrtm(cv)*evec*k(0.05);
-        
-        
-        
-        obj.results.stat_ellipse{obj.result_ind,1}.mean=m;
-        obj.results.stat_ellipse{obj.result_ind,1}.cv=cv;
-        obj.results.stat_ellipse{obj.result_ind,1}.major_axis=elaxes(:,1)';
-        obj.results.stat_ellipse{obj.result_ind,1}.minor_axis=elaxes(:,2)';
-        
+        % Compute ellipse points
+      conf_elpoints = sqrtm (cv)*elpoints*k(0.05);
+      
+        % Compute ellipse axes
+      [e_vec,e_val] = eig(cv);
+      if (e_val(2,2) > e_val(1,1)) %Reorder
+        e_vec = fliplr (e_vec);
+        e_val = fliplr (flipud (e_val));
+      end
+      elaxes = sqrtm(cv) * e_vec * k(0.05);
+      
+      obj.results.stat_ellipse{obj.result_ind,1}.mean = m;
+      obj.results.stat_ellipse{obj.result_ind,1}.cv = cv;
+      obj.results.stat_ellipse{obj.result_ind,1}.major_axis = elaxes(:,1)';
+      obj.results.stat_ellipse{obj.result_ind,1}.minor_axis = elaxes(:,2)';
+      
         %plot([0 elaxes(1,1)]+m(1),[0 elaxes(2,1)]+m(2),'k')
         %plot([0 elaxes(1,2)]+m(1),[0 elaxes(2,2)]+m(2),'k')
         
-        switch params.geom
-            case 'area'
-                hndl=patch(conf_elpoints(1,:)+m(1),conf_elpoints(2,:)+m(2),draw_data.color,'FaceColor',draw_data.color,'EdgeColor',draw_data.color,'LineWidth',2,'FaceAlpha',0.2);
-                
-            case 'line'
-                hndl=patch(conf_elpoints(1,:)+m(1),conf_elpoints(2,:)+m(2),draw_data.color,'FaceColor','none','EdgeColor',draw_data.color,'LineWidth',2);    
-        end
-        tmp = set(hndl,params.patch_opts{:}); %displays a lot of stuff if we don't have an output value !
-        
-        
-        
-        center_hndl=plot(m(1),m(2),'+','MarkerFaceColor',draw_data.color,'MarkerEdgeColor',draw_data.color,'MarkerSize',10);
+      switch params.geom
+        case 'area'
+          hndl = patch (conf_elpoints(1,:)+m(1), conf_elpoints(2,:)+m(2), ...
+                        draw_data.color, 'FaceColor', draw_data.color, ...
+                        'EdgeColor', draw_data.color, 'LineWidth', 2, ...
+                        'FaceAlpha',0.2);
+        case 'line'
+          hndl = patch (conf_elpoints(1,:)+m(1), conf_elpoints(2,:)+m(2),
+                        draw_data.color, 'FaceColor', 'none', ...
+                        'EdgeColor', draw_data.color, 'LineWidth', 2);    
+      end
+      tmp = set(hndl, params.patch_opts{:});
+          % displays a lot of stuff if we don't have an output value !
+      
+      center_hndl = plot (m(1), m(2), '+', 'MarkerFaceColor', draw_data.color, ...
+                          'MarkerEdgeColor', draw_data.color, 'MarkerSize', 10);
     else
-        
-        r=[combx comby combz];
-        k=@(alpha) sqrt(chi2inv(1-alpha,3));
+      
+      r = [combx comby combz];
+      k = @(alpha) sqrt (chi2inv (1-alpha, 3));
         
         %If a CI on the mean is requested, we replace the original points
         %with bootstrapped mean samples
-        if strcmp(params.type,'ci')
-            r=bootstrp(1000,@nanmean,r);
-        end
-        
+      if (strcmp (params.type, 'ci'))
+        r = bootstrp (1000, @nanmean, r) ;
+      end
+      
         %Extract mean and covariance
-        m=nanmean(r);
-        cv=nancov(r);
+      m = nanmean (r);
+      cv = nancov (r);
         
-        obj.results.ellipse{obj.result_ind,1}.mean=m;
-        obj.results.ellipse{obj.result_ind,1}.cv=cv;
+      obj.results.ellipse{obj.result_ind,1}.mean = m;
+      obj.results.ellipse{obj.result_ind,1}.cv = cv;
         
-        conf_sphpoints=sphpoints;
-        conf_sphpoints.vertices=bsxfun(@plus,sqrtm(cv)*conf_sphpoints.vertices'*k(0.05),m')';
-        hndl=patch(conf_sphpoints,'FaceColor',draw_data.color,'EdgeColor','none','LineWidth',2,'FaceAlpha',0.2);
-        
-        center_hndl=plot3(m(1),m(2),m(3),'+','MarkerFaceColor',draw_data.color,'MarkerEdgeColor',draw_data.color,'MarkerSize',10);
+      conf_sphpoints = sphpoints;
+      conf_sphpoints.vertices = ...
+      bsxfun (@plus, sqrtm(cv)*conf_sphpoints.vertices'*k(0.05),m')';
+      hndl = patch (conf_sphpoints, 'FaceColor', draw_data.color, ...
+                    'EdgeColor', 'none', 'LineWidth', 2, 'FaceAlpha', 0.2);
+      
+      center_hndl = plot3 (m(1), m(2), m(3), '+', ...
+                           'MarkerFaceColor', draw_data.color, ...
+                           'MarkerEdgeColor', draw_data.color,...
+                           'MarkerSize', 10);
     end
-    obj.results.stat_ellipse{obj.result_ind,1}.ellipse_handle=hndl;
-    obj.results.stat_ellipse{obj.result_ind,1}.center_handle=center_hndl;
-else
-    warning('Not enough points for ellipse')
-end
+    obj.results.stat_ellipse{obj.result_ind,1}.ellipse_handle = hndl;
+    obj.results.stat_ellipse{obj.result_ind,1}.center_handle = center_hndl;
+  else
+    warning ('Not enough points for ellipse')
+  end
 end

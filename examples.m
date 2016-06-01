@@ -33,7 +33,7 @@ g.set_title('Fuel economy of new cars between 1970 and 1982');
 %%%
 % Do the actual drawing
 figure('Position',[100 100 800 400]);
-g.draw();
+g.draw;
 
 %% Grouping options in gramm
 % With gramm there are a lot ways to map groups to visual properties of
@@ -93,11 +93,7 @@ g(3,2).set_names('x','Horsepower','y','MPG','column','# Cyl');
 g(3,2).set_title('subplot columns');
 
 figure('Position',[100 100 800 800]);
-try
- g.draw();
-catch
-  disp ('second example is not working');
-end
+draw (g);
 
 %% Methods for visualizing Y~X relationships with X as categorical variable
 % The following methods can be used when Y data is continuous and X data discrete/categorical.
@@ -115,6 +111,9 @@ try
   g(2,1)=copy(g(1));
   g(2,2)=copy(g(1));
 catch
+  g(1, 2) = gramm('x',cars.Origin_Region,'y',cars.Horsepower,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(2, 1) = gramm('x',cars.Origin_Region,'y',cars.Horsepower,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(2, 2) = gramm('x',cars.Origin_Region,'y',cars.Horsepower,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
   has_copy = false;
 end
 
@@ -122,32 +121,33 @@ end
 g(1,1).geom_point();
 g(1,1).set_title('geom_point()');
 
-if (has_copy)
+
 %Jittered scatter plot
-  g(1,2).geom_jitter('width',0.4,'height',0);
-  g(1,2).set_title('geom_jitter()');
+g(1,2).geom_jitter('width',0.4,'height',0);
+g(1,2).set_title('geom_jitter()');
 
 %Averages with confidence interval
-  g(2,1).stat_summary('geom',{'bar','black_errorbar'});
-  g(2,1).set_title('stat_summary()');
+g(2,1).stat_summary('geom',{'bar','black_errorbar'});
+g(2,1).set_title('stat_summary()');
 
 %Boxplots
-  g(2,2).stat_boxplot();
-  g(2,2).set_title('stat_boxplot()');
-end
+g(2,2).stat_boxplot();
+g(2,2).set_title('stat_boxplot()');
 
 %These functions can be called on arrays of gramm objects
 try
   g.set_names('x','Origin','y','Horsepower','color','# Cyl');
 catch
-  g = g(1, 1);
-  g.set_names('x','Origin','y','Horsepower','color','# Cyl');
+ set_names (g, 'x','Origin','y','Horsepower','color','# Cyl');
 end
-g.set_title('Visualization of Y~X relationships with X as categorical variable');
-
+try
+  g.set_title('Visualization of Y~X relationships with X as categorical variable');
+catch
+  set_title(g, 'Visualization of Y~X relationships with X as categorical variable');
+end
+  
 figure('Position',[100 100 800 550]);
-g.draw();
-
+draw(g);
 
 %% Methods for visualizing X densities
 % The following methods can be used in order to represent the density of a continuous variable. Note that here
@@ -162,6 +162,10 @@ if (has_copy)
   g(1,2)=copy(g(1));
   g(2,1)=copy(g(1));
   g(2,2)=copy(g(1));
+else
+  g(1,2) = gramm('x',cars.Horsepower,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(2,1) = gramm('x',cars.Horsepower,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(2,2) = gramm('x',cars.Horsepower,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
 end
 
 %Raw data as raster plot
@@ -169,34 +173,36 @@ g(1,1).facet_grid(cars.Origin_Region,[]);
 g(1,1).geom_raster();
 g(1,1).set_title('geom_raster()');
 
-if (has_copy)
 %Histogram
-  g(1,2).facet_grid(cars.Origin_Region,[]);
-  g(1,2).stat_bin('nbins',8);
-  g(1,2).set_title('stat_bin()');
+g(1,2).facet_grid(cars.Origin_Region,[]);
+g(1,2).stat_bin('nbins',8);
+g(1,2).set_title('stat_bin()');
 
 %Kernel smoothing density estimate
-  g(2,1).facet_grid(cars.Origin_Region,[]);
+g(2,1).facet_grid(cars.Origin_Region,[]);
+if (exist ('ksdensity'))
   g(2,1).stat_density();
-  g(2,1).set_title('stat_density()');
+end
+g(2,1).set_title('stat_density()');
 
 % Q-Q plot for normality
-  g(2,2).facet_grid(cars.Origin_Region,[]);
-  g(2,2).stat_qq();
-  g(2,2).axe_property('XLim',[-5 5]);
-  g(2,2).set_title('stat_qq()');
-end
+g(2,2).facet_grid(cars.Origin_Region,[]);
+g(2,2).stat_qq();
+g(2,2).axe_property('XLim',[-5 5]);
+g(2,2).set_title('stat_qq()');
 
 try
   g.set_names('x','Horsepower','color','# Cyl','row','','y','');
 catch
-  g = g(1,1);
-  g.set_names('x','Horsepower','color','# Cyl','row','','y','');
+  set_names(g, 'x','Horsepower','color','# Cyl','row','','y','');
 end
-g.set_title('Visualization of X densities');
+try
+  g.set_title('Visualization of X densities');
+catch
+  set_title(g, 'Visualization of X densities');
+end
 figure('Position',[100 100 800 550]);
-g.draw();
-
+draw(g);
 
 %% Methods for visualizing Y~X relationship with both X and Y as continuous variables
 % The following methods can be used when
@@ -210,38 +216,44 @@ if (has_copy)
   g(1,3)=copy(g(1));
   g(2,1)=copy(g(1));
   g(2,2)=copy(g(1));
+else
+  g(1,2) = gramm('x',cars.Horsepower,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(1,3) = gramm('x',cars.Horsepower,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(2,1) = gramm('x',cars.Horsepower,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
+  g(2,2) = gramm('x',cars.Horsepower,'y',cars.Acceleration,'color',cars.Cylinders,'subset',cars.Cylinders~=3 & cars.Cylinders~=5);
 end
 
 g(1,1).geom_point();
 g(1,1).set_title('geom_point()');
 
-if (has_copy)
 %Generalized linear model fit
-  g(1,2).stat_glm();
-  g(1,2).set_title('stat_glm()');
+g(1,2).stat_glm();
+g(1,2).set_title('stat_glm()');
 
 %Custom fit with provided function
-  g(1,3).stat_fit('fun',@(a,b,c,x)a./(x+b)+c,'intopt','functional');
-  g(1,3).set_title('stat_fit(''fun'',@(a,b,c,x)a./(x+b)+c)');
+g(1,3).stat_fit ('fun', @(a,b,c,x)a./(x+b)+c, 'intopt', 'functional');
+g(1,3).set_title ('stat_fit(''fun'',@(a,b,c,x)a./(x+b)+c)');
 
 %Spline smoothing
-  g(2,1).stat_smooth();
-  g(2,1).set_title('stat_smooth()');
+g(2,1).stat_smooth ();
+g(2,1).set_title ('stat_smooth()');
 
 %Moving average
-  g(2,2).stat_summary('bin_in',10);
-  g(2,2).set_title('stat_summary(''bin_in'',10)');
-end
+g(2,2).stat_summary ('bin_in',10);
+g(2,2).set_title ('stat_summary(''bin_in'',10)');
 
 try
   g.set_names('x','Horsepower','y','Acceleration','color','# Cylinders');
 catch
-  g = g(1, 1);
-  g.set_names('x','Horsepower','y','Acceleration','color', '# Cylinders');
+  set_names(g, 'x','Horsepower','y','Acceleration','color', '# Cylinders');
 end
-g.set_title('Visualization of Y~X relationship with both X and Y as continuous variables');
-figure('Position',[100 100 800 550]);
-g.draw();
+try
+  g.set_title('Visualization of Y~X relationship with both X and Y as continuous variables');
+catch
+  set_title(g, 'Visualization of Y~X relationship with both X and Y as continuous variables');
+end
+figure('Position', [100 100 800 550]);
+draw (g);
 
 
 %% Methods for visualizing custom confidence intervals
@@ -295,7 +307,7 @@ N=10^4;
 x=randn(1,N);
 y=x+randn(1,N);
 test=repmat([0 1 0 0],1,N/4);
-y(test==0)=y(test==0)+3;
+y(test==0) = y(test==0)+3;
 
 clear g
 % Display points and 95% percentile confidence ellipse
@@ -308,9 +320,9 @@ g(1,1).stat_ellipse('type','95percentile','geom','area','patch_opts',{'FaceAlpha
 g(1,1).set_title('stat_ellispe()');
 
 %Plot point density as contour plot
-g(1,2)=gramm('x',x,'y',y,'color',test);
-g(1,2).stat_bin2d('nbins',[10 10],'geom','contour');
-g(1,2).set_names('color','grp');
+g(1,2)=gramm('x', x, 'y', y, 'color',test);
+g(1,2).stat_bin2d('nbins', [10 10], 'geom', 'contour');
+g(1,2).set_names('color', 'grp');
 g(1,2).set_title('stat_bin2d(''geom'',''contour'')');
 
 % %Plot density as point size (looks good only when axes have the same
@@ -324,28 +336,23 @@ g(1,2).set_title('stat_bin2d(''geom'',''contour'')');
 %Plot density as heatmaps (Heatmaps don't work with multiple colors, so we separate
 %the categories with facets). With the heatmap we see better the
 %distribution in high-density areas
-g(2,1)=gramm('x',x,'y',y);
-g(2,1).facet_grid([],test);
-g(2,1).stat_bin2d('nbins',[20 20],'geom','image');
+g(2,1) = gramm('x', x, 'y', y);
+g(2,1).facet_grid ([], test);
+g(2,1).stat_bin2d ('nbins', [20 20], 'geom','image');
 %g(2,1).set_continuous_color('LCH_colormap',[0 100 ; 100 20 ;30 20]); %Let's try a custom LCH colormap !
-g(2,1).set_names('column','grp','color','count');
-g(2,1).set_title('stat_bin2d(''geom'',''image'')');
+g(2,1).set_names ('column', 'grp', 'color', 'count');
+g(2,1).set_title ('stat_bin2d(''geom'',''image'')');
 
 try
   g.set_title('Visualization of 2D densities');
 catch
-  g = g(1, 1);
-  g.set_title('Visualization of 2D densities');
+  set_title(g, 'Visualization of 2D densities');
 end
 
 figure('Position',[100 100 800 600])
-try
-  g.draw();
+draw(g);
 %We change the point size in the first graph a posteriori
-  set([g(1,1).results.geom_point_handle],'MarkerSize',2);
-catch
-  disp ('The example using surf2patch failed');
-end
+set ([g(1,1).results.geom_point_handle],'MarkerSize',2);
 
 %% Methods for visualizing repeated trajectories
 % gramm supports 2D inputs for X and Y data (as 2D array or cell of
@@ -365,36 +372,36 @@ x=linspace(0,3,nx);
 y=arrayfun(@(c)sin(x*c)+randn(1,nx)/10+x*randn/5,cind,'UniformOutput',false);
 
 clear g
-g(1,1)=gramm('x',x,'y',y,'color',c);
+g(1,1)=gramm('x', x, 'y', y, 'color', c);
 if (has_copy)
   g(1,2)=copy(g(1));
   g(2,1)=copy(g(1));
   g(2,2)=copy(g(1));
+else
+  g(1,2) = gramm('x', x,'y', y, 'color', c);
+  g(2,1) = gramm('x', x,'y', y, 'color', c);
+  g(2,2) = gramm('x', x,'y', y, 'color', c);
 end
 
 g(1,1).geom_point();
 g(1,1).set_title('geom_point()');
 
-if (has_copy)
 g(1,2).geom_line();
 g(1,2).set_title('geom_line()');
 
 g(2,1).stat_smooth();
 g(2,1).set_title('stat_smooth()');
 
-
 g(2,2).stat_summary();
 g(2,2).set_title('stat_summary()');
-end
 
 try
-  g.set_title('Visualization of repeated trajectories ');
+  g.set_title ('Visualization of repeated trajectories ');
 catch
-  g = g(1, 1);
-  g.set_title('Visualization of repeated trajectories ');
+  set_title (g, 'Visualization of repeated trajectories ');
 end
 figure('Position',[100 100 800 550]);
-g.draw();
+draw(g);
 
 %% Methods for visualizing repeated densities (e.g. spike densities)
 % With the support of 2D inputs for X and gramm's functionality for
@@ -417,27 +424,27 @@ for k=1:N
 end
 
 clear g
-g(1,1)=gramm('x',spike_train,'color',c);
+g(1,1) = gramm ('x', spike_train, 'color', c);
 g(1,1).geom_raster();
 g(1,1).set_title('geom_raster()');
 
-if (has_copy)
-  g(1,2)=gramm('x',spike_train,'color',c);
-  g(1,2).stat_bin('nbins',25,'geom','line');
-  g(1,2).set_title('stat_bin()');
-end
+g(1,2) = gramm ('x', spike_train, 'color', c);
+g(1,2).stat_bin('nbins', 25, 'geom', 'line');
+g(1,2).set_title('stat_bin()');
 
 try
   g.set_names('x','Time','y','');
 catch
-  g = g(1, 1);
-  g.set_names('x','Time','y','');
+  set_names(g, 'x','Time','y','');
 end
 
-g.set_title('Visualization of spike densities');
-
+try
+  g.set_title('Visualization of spike densities');
+catch
+  set_title(g, 'Visualization of spike densities');
+end
 figure('Position',[100 100 800 350]);
-g.draw();
+draw(g);
 
 %% Options for separating groups across subplots with facet_grid()
 % To separate groups in different rows and columns of sublots, the grouping
@@ -475,56 +482,63 @@ y(cind==3 & rind==2)=y(cind==3  & rind==2)*3;
 y=y-rind*4;
 
 clear g
-g(1,1)=gramm('x',x,'y',y,'color',c,'lightness',r);
+g(1,1) = gramm('x', x, 'y', y, 'color', c, 'lightness', r);
 if (has_copy)
   g(1,2)=copy(g(1));
   g(2,1)=copy(g(1));
   g(2,2)=copy(g(1));
   g(3,1)=copy(g(1));
   g(3,2)=copy(g(1));
+else
+  g(1,2) = gramm('x', x, 'y', y, 'color', c, 'lightness', r);
+  g(2,1) = gramm('x', x, 'y', y, 'color', c, 'lightness', r);
+  g(2,2) = gramm('x', x, 'y', y, 'color', c, 'lightness', r);
+  g(3,1) = gramm('x', x, 'y', y, 'color', c, 'lightness', r);
+  g(3,2) =  gramm('x', x, 'y', y, 'color', c, 'lightness', r);
 end
 
 g(1,1).geom_point();
 g(1,1).set_title('No facets');
-if (has_copy)
-  g(1,2).facet_grid(r,c);
-  g(1,2).geom_point();
-  g(1,2).no_legend();
-  g(1,2).set_title('facet_grid()');
-  
-  g(2,1).facet_grid(r,c,'scale','free');
-  g(2,1).geom_point();
-  g(2,1).no_legend();
-  g(2,1).set_title('facet_grid(''scale'',''free'')');
 
-  g(2,2).facet_grid(r,c,'scale','free','space','free');
-  g(2,2).geom_point();
-  g(2,2).no_legend();
-  g(2,2).set_title('facet_grid(''scale'',''free'',''space'',''free'')');
+g(1,2).facet_grid(r,c);
+g(1,2).geom_point();
+g(1,2).no_legend();
+g(1,2).set_title('facet_grid()');
 
-  g(3,1).facet_grid(r,c,'scale','free_x');
-  g(3,1).geom_point();
-  g(3,1).no_legend();
-  g(3,1).set_title('facet_grid(''scale'',''free_x'')');
+g(2,1).facet_grid(r,c,'scale','free');
+g(2,1).geom_point();
+g(2,1).no_legend();
+g(2,1).set_title('facet_grid(''scale'',''free'')');
 
-  g(3,2).facet_grid(r,c,'scale','independent');
-  g(3,2).geom_point();
-  g(3,2).no_legend();
-  g(3,2).set_title('facet_grid(''scale'',''independent'')');
-end
+g(2,2).facet_grid(r,c,'scale','free','space','free');
+g(2,2).geom_point();
+g(2,2).no_legend();
+g(2,2).set_title('facet_grid(''scale'',''free'',''space'',''free'')');
+
+g(3,1).facet_grid(r,c,'scale','free_x');
+g(3,1).geom_point();
+g(3,1).no_legend();
+g(3,1).set_title('facet_grid(''scale'',''free_x'')');
+
+g(3,2).facet_grid(r,c,'scale','independent');
+g(3,2).geom_point();
+g(3,2).no_legend();
+g(3,2).set_title('facet_grid(''scale'',''independent'')');
 
 try
-  g.set_color_options('lightness_range',[40 80],'chroma_range',[80 40]);
+  g.set_color_options ('lightness_range', [40 80], 'chroma_range', [80 40]);
+  g.set_names ('column', '', 'row', '');
+  g.set_title ('facet_grid() options');  
 catch
-  g = g(1, 1);
-  g.set_color_options('lightness_range',[40 80],'chroma_range',[80 40]);
+  set_color_options (g, 'lightness_range', [40 80], 'chroma_range', [80 40]);
+  set_names (g, 'column', '', 'row', '');
+  set_title (g, 'facet_grid() options');  
 end
-  g.set_names('column','','row','');
 %g.axe_property('color',[0.9 0.9 0.9],'XGrid','on','YGrid','on','GridColor',[1 1 1],'GridAlpha',0.8,'TickLength',[0 0],'XColor',[0.3 0.3 0.3],'YColor',[0.3 0.3 0.3])
-g.set_title('facet_grid() options');
+
 
 figure('Position',[100 100 800 800]);
-g.draw();
+draw(g);
 
 %% Options for creating histograms with stat_bin() 
 % Example of different |'geom'| options:
@@ -543,44 +557,47 @@ cat=repmat([1 1 1 2],300,1);
 x(cat==2)=x(cat==2)+2;
 
 clear g5
-g5(1,1)=gramm('x',x,'color',cat);
+g5(1,1) = gramm('x', x, 'color', cat);
 if (has_copy)
   g5(1,2)=copy(g5(1));
   g5(1,3)=copy(g5(1));
   g5(2,1)=copy(g5(1));
   g5(2,2)=copy(g5(1));
   g5(2,3)=copy(g5(1));
+else
+  g5(1,2) = gramm('x', x, 'color', cat);
+  g5(1,3) = gramm('x', x, 'color', cat);
+  g5(2,1) = gramm('x', x, 'color', cat);
+  g5(2,2) = gramm('x', x, 'color', cat);
+  g5(2,3) = gramm('x', x, 'color', cat);
 end
 
 g5(1,1).stat_bin(); %by default, 'geom' is 'bar', where color groups are side-by-side (dodged)
 g5(1,1).set_title('''bar'' (default)');
 
-if (has_copy)
-  g5(1,2).stat_bin('geom','stacked_bar'); %Stacked bars option
-  g5(1,2).set_title('''stacked_bar''');
+g5(1,2).stat_bin('geom','stacked_bar'); %Stacked bars option
+g5(1,2).set_title('''stacked_bar''');
 
-  g5(2,1).stat_bin('geom','line'); %Draw lines instead of bars, easier to visualize when lots of categories, default fill to edges !
-  g5(2,1).set_title('''line''');
+g5(2,1).stat_bin('geom','line'); %Draw lines instead of bars, easier to visualize when lots of categories, default fill to edges !
+g5(2,1).set_title('''line''');
 
-  g5(2,2).stat_bin('geom','overlaid_bar'); %Overlaid bar automatically changes bar coloring to transparent
-  g5(2,2).set_title('''overlaid_bar''');
+g5(2,2).stat_bin('geom','overlaid_bar'); %Overlaid bar automatically changes bar coloring to transparent
+g5(2,2).set_title('''overlaid_bar''');
 
-  g5(1,3).stat_bin('geom','point'); 
-  g5(1,3).set_title('''point''');
+g5(1,3).stat_bin('geom','point'); 
+g5(1,3).set_title('''point''');
 
-  g5(2,3).stat_bin('geom','stairs'); %Default fill is edges
-  g5(2,3).set_title('''stairs''');
-end
+g5(2,3).stat_bin('geom','stairs'); %Default fill is edges
+g5(2,3).set_title('''stairs''');
 
 try
   g5.set_title('''geom'' options for stat_bin()');
 catch
-  g5 = g5(1, 1);
-  g5.set_title('''geom'' options for stat_bin()');
+  set_title(g5, '''geom'' options for stat_bin()');
 end
 
 figure('Position',[100 100 800 600]);
-g5.draw();
+draw(g5);
 
 %%
 % Example of alternative |'fill'| options
@@ -591,43 +608,46 @@ g5.draw();
 % * |'transparent'|
 
 clear g6
-g6(1,1)=gramm('x',x,'color',cat);
+g6(1,1) = gramm('x', x, 'color', cat);
 if (has_copy)
   g6(1,2)=copy(g6(1));
   g6(1,3)=copy(g6(1));
   g6(2,1)=copy(g6(1));
   g6(2,2)=copy(g6(1));
   g6(2,3)=copy(g6(1));
+else
+  g6(1,2) = gramm('x', x, 'color', cat);
+  g6(1,3) = gramm('x', x, 'color', cat);
+  g6(2,1) = gramm('x', x, 'color', cat);
+  g6(2,2) = gramm('x', x, 'color', cat);
+  g6(2,3) = gramm('x', x, 'color', cat);
 end
 
 g6(1,1).stat_bin('fill','face');
 g6(1,1).set_title('''face''');
 
-if (has_copy)
-  g6(1,2).stat_bin('fill','transparent');
-  g6(1,2).set_title('''transparent''');
+g6(1,2).stat_bin('fill','transparent');
+g6(1,2).set_title('''transparent''');
   
-  g6(1,3).stat_bin('fill','all');
-  g6(1,3).set_title('''all''');
-  
-  g6(2,1).stat_bin('fill','edge');
-  g6(2,1).set_title('''edge''');
-  
-  g6(2,2).stat_bin('geom','stairs','fill','transparent');
-  g6(2,2).set_title('''transparent''');
+g6(1,3).stat_bin('fill','all');
+g6(1,3).set_title('''all''');
 
-  g6(2,3).stat_bin('geom','line','fill','all');
-  g6(2,3).set_title('''all''');
-end
+g6(2,1).stat_bin('fill','edge');
+g6(2,1).set_title('''edge''');
+
+g6(2,2).stat_bin('geom','stairs','fill','transparent');
+g6(2,2).set_title('''transparent''');
+
+g6(2,3).stat_bin('geom','line','fill','all');
+g6(2,3).set_title('''all''');
 
 try
   g6.set_title('''fill'' options for stat_bin()');
 catch
-  g6 = g6(1, 1);
-  g6.set_title('''fill'' options for stat_bin()');
+  set_title(g6, '''fill'' options for stat_bin()');
 end
 figure('Position',[100 100 800 600]);
-g6.draw();
+draw (g6);
 
 %%
 % Examples of other histogram-generation options
@@ -640,7 +660,7 @@ g6.draw();
 % * |'normalization','countdensity'| and custom edges
 
 clear g7
-g7(1,1)=gramm('x',x,'color',cat);
+g7(1,1) = gramm ('x', x, 'color', cat);
 
 if (has_copy)
   g7(1,2)=copy(g7(1));
@@ -648,44 +668,45 @@ if (has_copy)
   g7(2,1)=copy(g7(1));
   g7(2,2)=copy(g7(1));
   g7(2,3)=copy(g7(1));
+else
+  g7(1,2) = gramm ('x', x, 'color', cat);
+  g7(1,3) = gramm ('x', x, 'color', cat);
+  g7(2,1) = gramm ('x', x, 'color', cat);
+  g7(2,2) = gramm ('x', x, 'color', cat);
+  g7(2,3) = gramm ('x', x, 'color', cat);
 end
 
 g7(1,1).stat_bin('geom','overlaid_bar'); %Default binning (30 bins)
 
-if (has_copy)
 %Normalization to 'probability'
-  g7(2,1).stat_bin('normalization','probability','geom','overlaid_bar');
-  g7(2,1).set_title('''normalization'',''probability''','FontSize',10);
+g7(2,1).stat_bin('normalization','probability','geom','overlaid_bar');
+g7(2,1).set_title('''normalization'',''probability''','FontSize',10);
   
 %Normalization to cumulative count
-  g7(1,2).stat_bin('normalization','cumcount','geom','stairs');
-  g7(1,2).set_title('''normalization'',''cumcount''','FontSize',10);
+g7(1,2).stat_bin('normalization','cumcount','geom','stairs');
+g7(1,2).set_title('''normalization'',''cumcount''','FontSize',10);
 
 %Normalization to cumulative density
-  g7(2,2).stat_bin('normalization','cdf','geom','stairs');
-  g7(2,2).set_title('''normalization'',''cdf''','FontSize',10);
+g7(2,2).stat_bin('normalization','cdf','geom','stairs');
+g7(2,2).set_title('''normalization'',''cdf''','FontSize',10);
 
 %Custom edges for the bins
-  g7(1,3).stat_bin('edges',-1:0.5:10,'geom','overlaid_bar');
-  g7(1,3).set_title('''edges'',-1:0.5:10','FontSize',10);
+g7(1,3).stat_bin('edges',-1:0.5:10,'geom','overlaid_bar');
+g7(1,3).set_title('''edges'',-1:0.5:10','FontSize',10);
 
 %Custom edges with non-constand width (normalization 'countdensity'
 %recommended)
-  g7(2,3).stat_bin('geom','overlaid_bar','normalization','countdensity','edges',[-5 -4 -2 -1 -0.5 -0.25 0 0.25 0.5  1 2 4 5]);
-  g7(2,3).set_title({'''normalization'',''countdensity'',' '''edges'',' '[-5 -4 -2 -1 -0.5 -0.25 0 0.25 0.5  1 2 4 5]'},'FontSize',10);
-end
+g7(2,3).stat_bin('geom','overlaid_bar','normalization','countdensity','edges',[-5 -4 -2 -1 -0.5 -0.25 0 0.25 0.5  1 2 4 5]);
+g7(2,3).set_title({'''normalization'',''countdensity'',' '''edges'',' '[-5 -4 -2 -1 -0.5 -0.25 0 0.25 0.5  1 2 4 5]'},'FontSize',10);
 
 try
   g7.set_title('Other options for stat_bin()');
 catch
-  g7 = g7(1, 1);
-  g7.set_title('Other options for stat_bin()');
+  set_title(g7, 'Other options for stat_bin()');
 end
 
 figure('Position',[100 100 800 600]);
-g7.draw();
-
-
+draw(g7);
 
 %% Options for dodging and spacing graphic elements in |stat_summary()| and |stat_boxplot()|
 % |stat_summary()| and |stat_boxplot()|, as well as |stat_bin()|, use a pair of options for
@@ -702,89 +723,94 @@ y=2+y+x+c*0.5;
 
 
 clear g
-g(1,1)=gramm('x',catx,'y',y,'color',c);
+g(1,1) = gramm ('x', catx, 'y', y, 'color', c);
 if (has_copy)
   g(2,1)=copy(g(1));
   g(3,1)=copy(g(1));
   g(4,1)=copy(g(1));
   g(5,1)=copy(g(1));
+else
+  g(2,1) = gramm ('x', catx, 'y', y, 'color', c);
+  g(3,1) = gramm ('x', catx, 'y', y, 'color', c);
+  g(4,1) = gramm ('x', catx, 'y', y, 'color', c);
+  g(5,1) = gramm ('x', catx, 'y', y, 'color', c);
+
 end
 
 g(1,1).stat_boxplot();
 g(1,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
 g(1,1).set_title('''width'',0.6,''dodge'',0.7 (Default)');
 
-if (has_copy)
-  g(2,1).stat_boxplot('width',0.5,'dodge',0);
-  g(2,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
-  g(2,1).set_title('''width'',0.5,''dodge'',0');
+g(2,1).stat_boxplot('width',0.5,'dodge',0);
+g(2,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
+g(2,1).set_title('''width'',0.5,''dodge'',0');
   
-  g(3,1).stat_boxplot('width',1,'dodge',1);
-  g(3,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
-  g(3,1).set_title('''width'',1,''dodge'',1');
+g(3,1).stat_boxplot('width',1,'dodge',1);
+g(3,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
+g(3,1).set_title('''width'',1,''dodge'',1');
   
-  g(4,1).stat_boxplot('width',0.6,'dodge',0.4);
-  g(4,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
-  g(4,1).set_title('''width'',0.6,''dodge'',0.4');
+g(4,1).stat_boxplot('width',0.6,'dodge',0.4);
+g(4,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
+g(4,1).set_title('''width'',0.6,''dodge'',0.4');
 
-  g(5,1).facet_grid([],c);
-  g(5,1).stat_boxplot('width',0.5,'dodge',0);
-  g(5,1).set_title('''width'',0.5,''dodge'',0');
-end
+g(5,1).facet_grid([],c);
+g(5,1).stat_boxplot('width',0.5,'dodge',0);
+g(5,1).set_title('''width'',0.5,''dodge'',0');
 
 try
   g.set_title('Dodge and spacing options for stat_boxplot()');
 catch
-  g = g(1, 1);
-  g.set_title('Dodge and spacing options for stat_boxplot()');
+  set_title(g, 'Dodge and spacing options for stat_boxplot()');
 end
 
 figure('Position',[100 100 800 1000]);
-g.draw();
+draw(g);
 
 %%
 % With |stat_summary()|, |'width'| controls the width of bars and error bars.
 
 clear g
-g(1,1)=gramm('x',catx,'y',y,'color',c);
+g(1,1) = gramm('x', catx, 'y', y, 'color',c);
 if (has_copy)
   g(2,1)=copy(g(1));
   g(3,1)=copy(g(1));
   g(4,1)=copy(g(1));
   g(5,1)=copy(g(1));
+else
+  g(2,1) = gramm('x', catx, 'y', y, 'color',c);
+  g(3,1) = gramm('x', catx, 'y', y, 'color',c);
+  g(4,1) = gramm('x', catx, 'y', y, 'color',c);
+  g(5,1) = gramm('x', catx, 'y', y, 'color',c);
 end
 
 g(1,1).stat_summary('geom',{'bar' 'black_errorbar'},'setylim',true);
 g(1,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
 g(1,1).set_title('Default dodging with ''geom'',''bar''');
 
-if (has_copy)
-  g(2,1).stat_summary('geom',{'bar' 'black_errorbar'},'dodge',0.7,'width',0.7);
-  g(2,1).set_title('''dodge'',0.7,''width'',0.7');
-  g(2,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
-  
-  g(3,1).stat_summary('geom',{'area'});
-  g(3,1).set_title('''geom'',''area''');
-  g(3,1).set_title('No dodging with ''geom'',''area''');
-  
-  g(4,1).stat_summary('geom',{'point' 'errorbar'},'dodge',0.3,'width',0.5);
-  g(4,1).set_title('''dodge'',0.3,''width'',0.5');
-  g(4,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
+g(2,1).stat_summary('geom',{'bar' 'black_errorbar'},'dodge',0.7,'width',0.7);
+g(2,1).set_title('''dodge'',0.7,''width'',0.7');
+g(2,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
 
-  g(5,1).facet_grid([],c);
-  g(5,1).stat_summary('geom',{'bar' 'black_errorbar'},'width',0.5,'dodge',0);
-  g(5,1).set_title('''width'',0.5,''dodge'',0');
-end
+g(3,1).stat_summary('geom',{'area'});
+g(3,1).set_title('''geom'',''area''');
+g(3,1).set_title('No dodging with ''geom'',''area''');
+
+g(4,1).stat_summary('geom',{'point' 'errorbar'},'dodge',0.3,'width',0.5);
+g(4,1).set_title('''dodge'',0.3,''width'',0.5');
+g(4,1).geom_vline('xintercept',0.5:1:10.5,'style','k-');
+
+g(5,1).facet_grid([],c);
+g(5,1).stat_summary('geom',{'bar' 'black_errorbar'},'width',0.5,'dodge',0);
+g(5,1).set_title('''width'',0.5,''dodge'',0');
 
 try
   g.set_title('Dodge and width options for stat_summary()');
 catch
-  g = g(1, 1);
-  g.set_title('Dodge and width options for stat_summary()');
+  set_title(g, 'Dodge and width options for stat_summary()');
 end
 
 figure('Position',[100 100 800 1000]);
-g.draw();
+draw(g);
 
 %% Using different groups for different stat_ and geom_ methods by superimposing gramm plots
 % By using the method update() after a first draw() call of a gramm object,
@@ -812,7 +838,7 @@ end
 % new grouping variable determining colors. We also change the facet_grid()
 % options, which will duplicate the fit made earlier across all new facets.
 % Last, color options are reinitialized to default values
-keyboard
+
 g10.update('color', cars.Cylinders);
 g10.facet_grid([],cars.Origin_Region);
 g10.set_color_options();
@@ -826,13 +852,19 @@ g10.draw();
 
 %Default: LCH-based colormap with hue variation
 clear g
-g(1,1)=gramm('x',cars.Origin,'y',cars.Horsepower,'color',cars.Origin);
+g(1,1) = gramm ('x', cars.Origin, 'y', cars.Horsepower, 'color', cars.Origin);
 if (has_copy)
   g(1,2)=copy(g(1));
   g(1,3)=gramm('x',cars.Origin,'y',cars.Horsepower,'lightness',cars.Origin);
   g(2,1)=copy(g(1));
   g(2,2)=copy(g(1));
   g(2,3)=copy(g(1));
+else
+  g(1,2) = gramm ('x', cars.Origin, 'y', cars.Horsepower, 'color', cars.Origin);
+  g(1,3) = gramm ('x', cars.Origin, 'y', cars.Horsepower, 'lightness',cars.Origin);
+  g(2,1) = gramm ('x', cars.Origin, 'y', cars.Horsepower, 'color', cars.Origin);
+  g(2,2) = gramm ('x', cars.Origin, 'y', cars.Horsepower, 'color', cars.Origin);
+  g(2,3) = gramm ('x', cars.Origin, 'y', cars.Horsepower, 'color', cars.Origin);
 end
 
 g(1,1).stat_summary('geom',{'bar'},'dodge',0);
@@ -840,37 +872,36 @@ g(1,1).set_title('Default LCH (''color'' groups)','FontSize',12);
 
 %Possibility to change the hue range as well as lightness and chroma of
 %the LCH-based colormap
-if (has_copy)
-  g(1,2).stat_summary('geom',{'bar'},'dodge',0);
-  g(1,2).set_color_options('hue_range',[-60 60],'chroma',40,'lightness',90);
-  g(1,2).set_title('Modified LCH (''color'' groups)','FontSize',12);
+g(1,2).stat_summary('geom',{'bar'},'dodge',0);
+g(1,2).set_color_options('hue_range',[-60 60],'chroma',40,'lightness',90);
+g(1,2).set_title('Modified LCH (''color'' groups)','FontSize',12);
 
 %Possibility to change the lightness and chroma range of the LCH-based
 %colormap when a 'lightness' variable is given
-  g(1,3).stat_summary('geom',{'bar'},'dodge',0);
-  g(1,3).set_color_options('lightness_range',[0 95],'chroma_range',[0 0]);
-  g(1,3).set_title('Modified LCH (''lightness'' groups)','FontSize',12);
+g(1,3).stat_summary('geom',{'bar'},'dodge',0);
+g(1,3).set_color_options('lightness_range',[0 95],'chroma_range',[0 0]);
+g(1,3).set_title('Modified LCH (''lightness'' groups)','FontSize',12);
 
 %Go back to Matlab's defauls colormap
-  g(2,1).stat_summary('geom',{'bar'},'dodge',0);
-  g(2,1).set_color_options('map','matlab');
-  g(2,1).set_title('Matlab 2014B+ ','FontSize',12);
+g(2,1).stat_summary('geom',{'bar'},'dodge',0);
+g(2,1).set_color_options('map','matlab');
+g(2,1).set_title('Matlab 2014B+ ','FontSize',12);
 
 %Brewer colormap 1
-  g(2,2).stat_summary('geom',{'bar'},'dodge',0);
-  g(2,2).set_color_options('map','brewer1');
-  g(2,2).set_title('Color Brewer 1','FontSize',12);
+g(2,2).stat_summary('geom',{'bar'},'dodge',0);
+g(2,2).set_color_options('map','brewer1');
+g(2,2).set_title('Color Brewer 1','FontSize',12);
 
 %Brewer colormap 2
-  g(2,3).stat_summary('geom',{'bar'},'dodge',0);
-  g(2,3).set_color_options('map','brewer2');
-  g(2,3).set_title('Color Brewer 2','FontSize',12);
-end
+g(2,3).stat_summary('geom',{'bar'},'dodge',0);
+g(2,3).set_color_options('map','brewer2');
+g(2,3).set_title('Color Brewer 2','FontSize',12);
 
 %Some methods can be called on all objects at the same time !
 try
   g.axe_property('YLim',[0 140]);
 catch
+keyboard
   g = g(1, 1);
   g.axe_property('YLim',[0 140]);
 end

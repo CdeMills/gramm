@@ -1,4 +1,4 @@
-function obj=stat_bin2d(obj,varargin)
+function obj=stat_bin2d(obj, varargin)
 % stat_bin2d() Makes 2D bins of X and Y data and displays count
 %
 % Parameters as 'name',value pairs:
@@ -10,41 +10,40 @@ function obj=stat_bin2d(obj,varargin)
 % heatmap (default), 'contour' uses a contour plot. 'point'
 % uses circles of varying size.
 
-p=inputParser;
-my_addParameter(p,'nbins',[30 30]);
-my_addParameter(p,'edges',{});
-my_addParameter(p,'geom','image'); %contour
-
-parse(p,varargin{:});
-
-obj.geom=vertcat(obj.geom,{@(dd)my_bin2d(obj,dd,p.Results)});
-obj.results.stat_bin2d={};
+  p = inputParser;
+  my_addParameter (p, 'nbins', [30 30]);
+  my_addParameter (p, 'edges', {});
+  my_addParameter (p, 'geom',' image'); %contour
+  
+  parse (p, varargin{:});
+  
+  obj.geom = vertcat(obj.geom, {@(dd) my_bin2d(obj, dd, p.Results)});
+  obj.results.stat_bin2d = {};
 end
 
 
-function hndl=my_bin2d(obj,draw_data,params)
+function hndl=my_bin2d(obj, draw_data, params)
 
 x=comb(draw_data.x);
 y=comb(draw_data.y);
 
-if isempty(params.edges)
-    [N,C] = hist3([shiftdim(x),shiftdim(y)],params.nbins);
+if (isempty(params.edges))
+    [N,C] = hist3 ([shiftdim(x), shiftdim(y)], params.nbins);
 else
-    [N,C] = hist3([shiftdim(x),shiftdim(y)],'Edges',params.edges);
+    [N,C] = hist3 ([shiftdim(x), shiftdim(y)], 'Edges', params.edges);
     
     obj.plot_lim.minx(obj.current_row,obj.current_column)=params.edges{1}(1);
     obj.plot_lim.maxx(obj.current_row,obj.current_column)=params.edges{1}(end);
     obj.plot_lim.miny(obj.current_row,obj.current_column)=params.edges{2}(1);
     obj.plot_lim.maxy(obj.current_row,obj.current_column)=params.edges{2}(end);
     
-    %Put values on the upper edges as if they were in the last
-    %bin
-    N(:,end-1)=N(:,end-1)+N(:,end);
-    N(end-1,:)=N(end-1,:)+N(end,:);
+    % Put values on the upper edges as if they were in the last bin
+    N(:,end-1) = N(:,end-1)+N(:,end);
+    N(end-1,:) = N(end-1,:)+N(end,:);
     
-    %Remove upper edge
-    N(:,end)=[];
-    N(end,:)=[];
+    % Remove upper edge
+    N(:,end) = [];
+    N(end,:) = [];
     
 end
 
@@ -53,9 +52,11 @@ obj.results.stat_bin2d{obj.result_ind,1}.counts=N;
 
 switch params.geom
     case 'contour'
-        
-        [~,hndl]=contour(C{1},C{2},N',5,'Color',draw_data.color);
-        
+      if (exist ('OCTAVE_VERSION', 'builtin'))
+        [~, hndl] = contour(C{1}, C{2}, N', 5, 'linecolor', draw_data.color);
+      else
+        [~, hndl] = contour(C{1}, C{2}, N', 5, 'Color', draw_data.color);
+      end
     case 'image'
         %Set colormap
         %colormap(pa_statcolor(256,'sequential','luminancechroma',[0 100 100 260]));
@@ -70,7 +71,7 @@ switch params.geom
         sel=Nr>0;
         %sel=true(size(Nr));
         
-        if isempty(params.edges)
+        if (isempty (params.edges))
             %Get polygon half widths
             wx=(C{1}(2)-C{1}(1))/2;
             wy=(C{2}(2)-C{2}(1))/2;

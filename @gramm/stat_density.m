@@ -11,22 +11,24 @@ function obj=stat_density(obj,varargin)
 % will be extended to the right and to the left by extra_x
 % times the range of x data.
 
-p=inputParser;
-my_addParameter(p,'bandwidth',-1);
-my_addParameter(p,'function','pdf')
-my_addParameter(p,'kernel','normal')
-my_addParameter(p,'npoints',100)
-my_addParameter(p,'extra_x',0.1)
-parse(p,varargin{:});
+  p = inputParser;
 
-obj.geom=vertcat(obj.geom,{@(dd)my_density(obj,dd,p.Results)});
-obj.results.stat_density={};
+  my_addParameter (p, 'bandwidth', -1);
+  my_addParameter (p, 'ksfunction', 'pdf')
+  my_addParameter (p, 'kernel', 'normal')
+  my_addParameter (p, 'npoints', 100)
+  my_addParameter (p, 'extra_x', 0.1)
+  parse(p, varargin{:});
+
+  obj.geom = vertcat (obj.geom, {@(dd) my_density (obj, dd, p.Results)});
+  obj.results.stat_density = {};
+
 end
 
-function hndl=my_density(obj,draw_data,params)
+function hndl=my_density(obj, draw_data, params)
 
 
-if obj.polar.is_polar
+if (obj.polar.is_polar)
     %Make x data modulo 2 pi
     draw_data.x=mod(comb(draw_data.x),2*pi);
     warning('Polar density estimate is probably not proper for circular data, use custom bandwidth');
@@ -40,10 +42,15 @@ else
     binranges=linspace(obj.var_lim.minx-extra_x,obj.var_lim.maxx+extra_x,params.npoints);
 end
 
-if params.bandwidth>0
-    [f,xi] = ksdensity(comb(draw_data.x),binranges,'function',params.function,'bandwidth',params.bandwidth,'kernel',params.kernel);
-else
-    [f,xi] = ksdensity(comb(draw_data.x),binranges,'function',params.function,'kernel',params.kernel);
+try
+  if (params.bandwidth > 0)
+    [f, xi] = ksdensity(comb(draw_data.x),binranges,'function',params.ksfunction,'bandwidth',params.bandwidth,'kernel',params.kernel);
+  else
+    [f, xi] = ksdensity(comb(draw_data.x),binranges,'function',params.ksfunction,'kernel',params.kernel);
+  end
+catch
+  disp ('Statistical function ksdensity seems not available');
+  return
 end
 
 obj.plot_lim.minx(obj.current_row,obj.current_column)=obj.var_lim.minx-extra_x;
@@ -63,7 +70,8 @@ obj.results.stat_density{obj.result_ind,1}.x=xi;
 obj.results.stat_density{obj.result_ind,1}.y=f;
 
 [xi,f]=to_polar(obj,xi,f);
-hndl=plot(xi,f,'LineStyle',draw_data.line_style,'Color',draw_data.color,'lineWidth',draw_data.size/4);
+hndl = plot (xi, f, 'LineStyle', draw_data.line_style, ...
+             'Color', draw_data.color, 'lineWidth', draw_data.size/4);
 
-obj.results.stat_density{obj.result_ind,1}.handle=hndl;
+obj.results.stat_density{obj.result_ind,1}.handle = hndl;
 end

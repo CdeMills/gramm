@@ -1,4 +1,4 @@
-function obj=stat_qq(obj,varargin)
+function obj=stat_qq(obj, varargin)
 % stat_qq Makes a quantile-quantile plot from the data in x
 %
 % 'distribution' is used to provide a custom distribution
@@ -7,8 +7,13 @@ function obj=stat_qq(obj,varargin)
 % distrubution to plot the distribution of y against the
 % distribution of x
 
-p=inputParser;
-my_addParameter(p,'distribution',makedist('Normal',0,1));
+p = inputParser;
+try 
+  my_addParameter(p, 'distribution', makedist ('Normal', 0, 1));
+catch
+  disp ('Statistical function makedist seems not available');
+  return 
+end
 parse(p,varargin{:});
 
 obj.geom=vertcat(obj.geom,{@(dd)my_qq(obj,dd,p.Results)});

@@ -1,4 +1,4 @@
-function obj=stat_smooth(obj,varargin)
+function obj=stat_smooth(obj, varargin)
 % stat_smooth Display a smoothed estimate of the data with
 % optional 95% bootstrapped confidence interval
 %
@@ -13,31 +13,40 @@ function obj=stat_smooth(obj,varargin)
 % array or cell array), each trajectory will be smoothed and
 % displayed individually (without confidence interval computation)
 
-p=inputParser;
-my_addParameter(p,'lambda',1000);
-my_addParameter(p,'geom','area');
-my_addParameter(p,'npoints',100);
-parse(p,varargin{:});
+   if (~exist ('bootstrp'))
+    disp ('Statistical function bootstrp seems not available');
+    return;
+   end
+   
+   p = inputParser;
+   my_addParameter (p, 'lambda', 1000);
+   my_addParameter (p, 'geom', 'area');
+   my_addParameter (p, 'npoints', 100);
+   parse(p,varargin{:});
 
-obj.geom=vertcat(obj.geom,{@(dd)my_smooth(obj,dd,p.Results)});
-obj.results.stat_smooth={};
+   obj.geom = vertcat(obj.geom, {@(dd) my_smooth (obj, dd, p.Results)});
+   obj.results.stat_smooth = {};
 end
 
 
-function hndl=my_smooth(obj,draw_data,params)
+function hndl=my_smooth(obj, draw_data,params)
 
-if iscell(draw_data.x) || iscell(draw_data.y) %If input was provided as cell/matrix
+  if (iscell (draw_data.x) || iscell (draw_data.y))
+    % If input was provided as cell/matrix
     
-    %Duplicate the draw data
-    %new_draw_data=draw_data;
+    % Duplicate the draw data
+    % new_draw_data=draw_data;
     
-    tempx=zeros(length(draw_data.y),params.npoints);
-    tempy=zeros(length(draw_data.y),params.npoints);
-    for k=1:length(draw_data.y) %then we smooth each trajectory independently
-        %[new_draw_data.y{k},new_draw_data.x{k}, ~] = turbotrend(draw_data.x{k}, draw_data.y{k}, params.lambda, 100);
-        [tempy(k,:),tempx(k,:), ~] = turbotrend(draw_data.x{k}, draw_data.y{k}, params.lambda, params.npoints);
+    tempx = zeros (length (draw_data.y), params.npoints);
+    tempy = zeros (length (draw_data.y), params.npoints);
+    for k=(1:length (draw_data.y))
+        % then we smooth each trajectory independently
+        % [new_draw_data.y{k},new_draw_data.x{k}, ~] = turbotrend(draw_data.x{k}, draw_data.y{k}, params.lambda, 100);
+      [tempy(k,:), tempx(k,:), ~] = ...
+      turbotrend (draw_data.x{k}, draw_data.y{k}, params.lambda, params.npoints);
     end
-    hndl=plot(tempx',tempy','LineStyle',draw_data.line_style,'lineWidth',draw_data.size/4,'Color',draw_data.color);
+    hndl = plot (tempx', tempy', 'LineStyle', draw_data.line_style,...
+                 'lineWidth', draw_data.size/4, 'Color', draw_data.color);
     
     %                 %Create fake params for call to stat_summary
     %                 summ_params.type='ci';
@@ -51,45 +60,47 @@ if iscell(draw_data.x) || iscell(draw_data.y) %If input was provided as cell/mat
     %                 %Call summary to do the actual plotting
     %                 obj.my_summary(new_draw_data,summ_params);
     
-    obj.results.stat_smooth{obj.result_ind,1}.x=tempx;
-    obj.results.stat_smooth{obj.result_ind,1}.y=tempy;
-    obj.results.stat_smooth{obj.result_ind,1}.line_handle=hndl;
+    obj.results.stat_smooth{obj.result_ind,1}.x = tempx;
+    obj.results.stat_smooth{obj.result_ind,1}.y = tempy;
+    obj.results.stat_smooth{obj.result_ind,1}.line_handle = hndl;
     
 else
     
-    combx=comb(draw_data.x);
-    [combx,i]=sort(combx);
-    comby=comb(draw_data.y);
-    comby=comby(i);
+    combx = comb(draw_data.x);
+    [combx, idx] = sort(combx);
+    comby = comb(draw_data.y);
+    comby = comby(idx);
     
-    %Remove NaN
-    idnan=isnan(combx) | isnan(comby);
-    combx(idnan)=[];
-    comby(idnan)=[];
+    % Remove NaN
+    idnan = (isnan(combx) | isnan(comby));
+    combx(idnan) = [];
+    comby(idnan) = [];
     
-    %Slow
+    % Slow
     %newy=smooth(combx,comby,0.2,'loess');
     %plot(combx,newy,'Color',c,'LineWidth',2)
     
     %Super fast spline smoothing !!
-    if length(combx)>3
-        [newy,newx, yfit] = turbotrend(combx, comby, params.lambda, params.npoints);
+    if (length (combx) > 3)
+      [newy, newx, yfit] ...
+      = turbotrend (combx, comby, params.lambda, params.npoints);
     else
-        newx=NaN;
-        newy=NaN;
+        newx = NaN;
+        newy = NaN;
     end
     
-    if length(combx)>10
-        booty=bootstrp(200,@(ax,ay)turbotrend(ax,ay,params.lambda,params.npoints),combx,comby);
-        yci=prctile(booty,[2.5 97.5]);
+    if (length (combx) > 10)
+      booty = ...
+      bootstrp (200, @(ax,ay) turbotrend(ax, ay, params.lambda, params.npoints),...
+                combx, comby);
+        yci = prctile (booty, [2.5 97.5]);
     else
-        yci=nan(2,length(newx));
+        yci = nan (2, length (newx));
     end
     
-    
-    obj.results.stat_smooth{obj.result_ind,1}.x=newx;
-    obj.results.stat_smooth{obj.result_ind,1}.y=newy;
-    obj.results.stat_smooth{obj.result_ind,1}.yci=yci;
+    obj.results.stat_smooth{obj.result_ind,1}.x = newx;
+    obj.results.stat_smooth{obj.result_ind,1}.y = newy;
+    obj.results.stat_smooth{obj.result_ind,1}.yci = yci;
     
     %For some reason bootci is super slow there ! %zci=bootci(50,@(ax,ay)turbotrend(ax,ay,10,100),combx,comby);
     
@@ -101,18 +112,18 @@ else
     
     
     %hndl=plotci(newx,newy,yci,c,lt,sz,geom);
-    hndl=plotci(obj,newx,newy,yci,draw_data,params.geom);
+    hndl = plotci(obj, newx, newy, yci, draw_data, params.geom);
     
     %Store plotted handles
-    hnames=fieldnames(hndl);
-    for k=1:length(hnames)
+    hnames = fieldnames(hndl);
+    for k=(1:length (hnames))
         obj.results.stat_smooth{obj.result_ind,1}.(hnames{k})=hndl.(hnames{k});
     end
     
     %cfit=fit(combx,comb(y)','smoothingspline');
     %newx=linspace(min(combx),max(combx),100);
     %hndl=plot(newx,cfit(newx),'Color',c);
-end
+  end
 end
 
 

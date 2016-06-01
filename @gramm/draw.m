@@ -56,7 +56,7 @@ if (numel (obj) > 1)
   if (do_redraw)
     redraw (obj,0.04);
     if (exist ('OCTAVE_VERSION', 'builtin'))
-      keyboard
+       set (gcf, 'resizefcn', @(a,b) redraw (obj, 0.04)); 
     else
       if (verLessThan ('matlab', '8.4'))
         set (gcf, 'ResizeFcn', @(a,b) redraw (obj, 0.04));
@@ -69,6 +69,10 @@ if (numel (obj) > 1)
 end
 
 % If x is empty the object probably is so we skip (happens for multiple graphs)
+if (isempty (obj.aes))
+  return
+end
+  
 if (isempty (obj.aes.x))
   return
 end
@@ -350,6 +354,7 @@ for ind_row = (1:length (uni_row))
               obj.facet_axes_handles(ind_row, ind_column) = mysubplot (length (uni_row), length (uni_column), ind_row, ind_column);
             end
          % And we copy the contents of the first facet in the new ones
+            keyboard
             copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
           end
                    % else
@@ -826,10 +831,19 @@ for ind_row = (1:length (uni_row)) % Loop over rows
   %# Octave specific: the first argument of linkprop must be a vector
   %# with length > 1
               if (numel (obj.facet_axes_handles) > 1)
+                if (~isfield (obj.extra, 'YLim_listeners'))
+                  obj.extra.YLim_listeners = cell ();
+                end
                 obj.extra.YLim_listeners ...
                 = linkprop (obj.facet_axes_handles(:), 'YLim');
+                if (~isfield (obj.extra, 'XLim_listeners'))
+                  obj.extra.XLim_listeners = cell ();
+                end
                 obj.extra.XLim_listeners ...
                 = linkprop (obj.facet_axes_handles(:), 'XLim');
+                if (~isfield (obj.extra, 'ZLim_listeners'))
+                  obj.extra.ZLim_listeners = cell ();
+                end
                 obj.extra.ZLim_listeners ...
                 = linkprop(obj.facet_axes_handles(:), 'ZLim');
               end
@@ -856,6 +870,9 @@ for ind_row = (1:length (uni_row)) % Loop over rows
                                 % YLims are linked across all plots
             if (1 == ind_row && 1 == ind_column)
               if (numel (obj.facet_axes_handles) > 1)
+                if (~isfield (obj.extra, 'XLim_listeners'))
+                  obj.extra.YLim_listeners = cell ();
+                end
                 obj.extra.XLim_listeners ...
                 = linkprop(obj.facet_axes_handles(:), 'XLim');
               end
@@ -882,10 +899,19 @@ for ind_row = (1:length (uni_row)) % Loop over rows
             
             if (1 == ind_row && 1 == ind_column)
               if (numel (obj.facet_axes_handles) > 1)
+                if (~isfield (obj.extra, 'YLim_listeners'))
+                  obj.extra.YLim_listeners = cell ();
+                end
                 obj.extra.YLim_listeners ...
                 = linkprop(obj.facet_axes_handles(:), 'YLim');
+                if (~isfield (obj.extra, 'XLim_listeners'))
+                  obj.extra.XLim_listeners = cell ();
+                end
                 obj.extra.XLim_listeners ...
                 = linkprop(obj.facet_axes_handles(:), 'XLim');
+                if (~isfield (obj.extra, 'ZLim_listeners'))
+                  obj.extra.ZLim_listeners = cell ();
+                end
                 obj.extra.ZLim_listeners ...
                 = linkprop(obj.facet_axes_handles(:), 'ZLim');
               end
@@ -900,13 +926,19 @@ for ind_row = (1:length (uni_row)) % Loop over rows
                                 % XLims are linked within columns
             if (1 == ind_row && 1 == ind_column)
               if (numel (obj.facet_axes_handles) > 1)
+                if (~isfield (obj.extra, 'YLim_listeners'))
+                  obj.extra.YLim_listeners = cell ();
+                end
                 obj.extra.YLim_listeners ...
                 = linkprop (obj.facet_axes_handles(:), 'YLim');
               end
             end
             
             if (1 == ind_row)
-               if (numel (obj.facet_axes_handles(:, ind_column)) > 1)
+              if (numel (obj.facet_axes_handles(:, ind_column)) > 1)
+                if (~isfield (obj.extra, 'XLim_listeners'))
+                  obj.extra.XLim_listeners = cell (length (uni_column), 1);
+                end
                  obj.extra.XLim_listeners(ind_column) ...
                  = linkprop (obj.facet_axes_handles(:, ind_column), 'XLim');
                end
@@ -921,12 +953,18 @@ for ind_row = (1:length (uni_row)) % Loop over rows
                                 % YLims are linked within rows
             if (1 == ind_row && 1 == ind_column)
               if (numel (obj.facet_axes_handles) > 1)
+                if (~isfield (obj.extra, 'XLim_listeners'))
+                  obj.extra.XLim_listeners = cell ();
+                end
                 obj.extra.XLim_listeners ...
                 = linkprop (obj.facet_axes_handles(:), 'XLim');
               end
             end
             if (1 == ind_column)
               if (numel (obj.facet_axes_handles(indrow, :)) > 1)
+                if (~isfield (obj.extra, 'YLim_listeners'))
+                  obj.extra.YLim_listeners = cell ();
+                end
                 obj.extra.YLim_listeners(ind_row) ...
                 = linkprop (obj.facet_axes_handles(ind_row, :), 'YLim');
               end
@@ -939,13 +977,19 @@ for ind_row = (1:length (uni_row)) % Loop over rows
                                 % XLims are linked within columns
                                 % YLims are linked within rows
             if (1 == ind_row)
-              if (numel (obj.facet_axes_handles(:, indcolumn)) > 1)
+              if (numel (obj.facet_axes_handles(:, ind_column)) > 1)
+                if (~isfield (obj.extra, 'XLim_listeners'))
+                  obj.extra.XLim_listeners = cell (ind_row, ind_column);
+                end
                 obj.extra.XLim_listeners(ind_column)...
                 = linkprop (obj.facet_axes_handles(:, ind_column), 'XLim');
               end
             end
             if (1 == ind_column)
-               if (numel (obj.facet_axes_handles(ind_row, :)) > 1)
+              if (numel (obj.facet_axes_handles(ind_row, :)) > 1)
+                 if (~isfield (obj.extra, 'YLim_listeners'))
+                  obj.extra.YLim_listeners = cell (ind_row, ind_column);
+                end
                  obj.extra.YLim_listeners(ind_row)...
                  = linkprop (obj.facet_axes_handles(ind_row,:), 'YLim');
                end
@@ -1053,10 +1097,19 @@ for ind_row = (1:length (uni_row)) % Loop over rows
                              % Link the camera properties between the
                              % facets so that they all rotate together
           if (numel (obj.facet_axes_handles) > 1)
+            if (~isfield (obj.extra, 'CamPos_listeners'))
+              obj.extra.CamPos_listeners = cell ();
+            end
             obj.extra.CamPos_listeners ...
             = linkprop (obj.facet_axes_handles(:), 'CameraPosition');
+            if (~isfield (obj.extra, 'CamTgt_listeners'))
+              obj.extra.CamTgt_listeners = cell ();
+            end
             obj.extra.CamTgt_listeners ...
             = linkprop(obj.facet_axes_handles(:), 'CameraTarget');
+            if (~isfield (obj.extra, 'CamUp_listeners'))
+              obj.extra.CamUp_listeners = cell ();
+            end
             obj.extra.CamUp_listeners ...
             = linkprop(obj.facet_axes_handles(:), 'CameraUpVector');
           end

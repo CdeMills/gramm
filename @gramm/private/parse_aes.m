@@ -1,4 +1,4 @@
-function out=parse_aes(obj, varargin)
+function out=parse_aes(varargin)
   %# Parse input to generate esthetics structure
   p = inputParser ();
 
@@ -21,6 +21,7 @@ function out=parse_aes(obj, varargin)
   my_addParameter (p, 'column', []);
   
   parse (p, varargin{:});
+  out = struct ();
 
   %# Make everyone column arrays
   for pr = (1:length(p.Parameters))

@@ -1,4 +1,4 @@
-function obj=stat_glm(obj,varargin)
+function obj=stat_glm(obj, varargin)
 % stat_glm Display a generalized linear model fit of the data
 %
 % Example syntax (default arguments): gramm_object.stat_glm('distribution','normal','geom','lines','fullrange','false')
@@ -17,31 +17,42 @@ function obj=stat_glm(obj,varargin)
 % corresponding p-value stars.
 
 %Accepted distributions: 'normal' (default) | 'binomial' | 'poisson' | 'gamma' | 'inverse gaussian'
-p=inputParser;
-my_addParameter(p,'distribution','normal');
-my_addParameter(p,'geom','area');
-my_addParameter(p,'fullrange',false);
-my_addParameter(p,'disp_fit',false);
-parse(p,varargin{:});
+  
+  if (~exist ('GeneralizedLinearModel'))
+    disp ('Statistical function GeneralizedLinearModel seems not available');
+    return;
+  end
+  p = inputParser;
+  my_addParameter (p, 'distribution','normal');
+  my_addParameter (p, 'geom','area');
+  my_addParameter (p, 'fullrange', false);
+  my_addParameter (p, 'disp_fit', false);
+  parse (p, varargin{:});
 
-obj.geom=vertcat(obj.geom,{@(dd)my_glm(obj,dd,p.Results)});
-obj.results.stat_glm={};
+  obj.geom = vertcat (obj.geom, {@(dd) my_glm(obj, dd, p.Results)});
+  obj.results.stat_glm = {};
 end
 
 
-function hndl=my_glm(obj,draw_data,params)
-combx=comb(draw_data.x)';
-comby=comb(draw_data.y)';
-
-if sum(~isnan(combx))>2 && sum(~isnan(comby))>2 %numel(combx)>2 &&
-    % Doesn't work in 2012b
-    %mdl=fitglm(combx,comby,'Distribution',params.distribution);
-    mdl = GeneralizedLinearModel.fit(combx,comby,'Distribution',params.distribution);
-    if params.fullrange
-        newx=linspace(obj.var_lim.minx,obj.var_lim.maxx,50)';
-    else
-        newx=linspace(min(combx),max(combx),50)';
+function hndl=my_glm(obj, draw_data, params)
+  combx = comb(draw_data.x)';
+  comby = comb(draw_data.y)';
+  
+  if (sum (~isnan (combx)) > 2 && sum (~isnan (comby))>2) %numel(combx)>2 &&
+          % Doesn't work in 2012b
+          %mdl=fitglm(combx,comby,'Distribution',params.distribution);
+    try
+      mdl = GeneralizedLinearModel.fit(combx,comby,'Distribution',params.distribution);
+    catch
+      disp ('Statistical function GeneralizedLinearModel seems not available');
+      return
     end
+    if (params.fullrange)
+      newx = linspace(obj.var_lim.minx,obj.var_lim.maxx,50)';
+    else
+      newx=linspace(min(combx),max(combx),50)';
+    end
+    
     [newy,yci]=predict(mdl,newx);
     
     obj.results.stat_glm{obj.result_ind,1}.x=newx;
@@ -54,23 +65,26 @@ if sum(~isnan(combx))>2 && sum(~isnan(comby))>2 %numel(combx)>2 &&
     %Store plotted handles
     hnames=fieldnames(hndl);
     for k=1:length(hnames)
-        obj.results.stat_glm{obj.result_ind,1}.(hnames{k})=hndl.(hnames{k});
+      obj.results.stat_glm{obj.result_ind,1}.(hnames{k})=hndl.(hnames{k});
     end
     
     if params.disp_fit
-        if obj.firstrun(obj.current_row,obj.current_column)
-            obj.extra.mdltext(obj.current_row,obj.current_column)=0.05;
-            %obj.firstrun(obj.current_row,obj.current_column)=0;
-        else
-            obj.extra.mdltext(obj.current_row,obj.current_column)=obj.extra.mdltext(obj.current_row,obj.current_column)+0.03;
-        end
-        obj.results.stat_glm{obj.result_ind,1}.text_handle=text('Units','normalized','Position',[0.1 obj.extra.mdltext(obj.current_row,obj.current_column)],'color',draw_data.color,...
-            'String',[ num2str(mdl.Coefficients.Estimate(1),5) '^{' pval_to_star(mdl.Coefficients.pValue(1)) ...
-            '} + ' num2str(mdl.Coefficients.Estimate(2),5) '^{' pval_to_star(mdl.Coefficients.pValue(2)) '} x']);
+      if obj.firstrun(obj.current_row,obj.current_column)
+        obj.extra.mdltext(obj.current_row,obj.current_column)=0.05;
+                  %obj.firstrun(obj.current_row,obj.current_column)=0;
+      else
+        obj.extra.mdltext(obj.current_row,obj.current_column)=obj.extra.mdltext(obj.current_row,obj.current_column)+0.03;
+      end
+      obj.results.stat_glm{obj.result_ind,1}.text_handle...
+      = text('Units', 'normalized', ...
+             'Position', [0.1 obj.extra.mdltext(obj.current_row,obj.current_column)], ...
+             'color', draw_data.color, ...
+             'String', [ num2str(mdl.Coefficients.Estimate(1),5) '^{' pval_to_star(mdl.Coefficients.pValue(1)) ...
+                                '} + ' num2str(mdl.Coefficients.Estimate(2),5) '^{' pval_to_star(mdl.Coefficients.pValue(2)) '} x']);
     end
     
-else
-    warning('Not enough points for linear fit')
-end
-
+  else
+    warning ('Not enough points for linear fit')
+  end
+  
 end

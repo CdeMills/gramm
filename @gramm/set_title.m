@@ -1,5 +1,5 @@
-function obj=set_title(obj,title,varargin)
-%set_title Add the specified title to the figure
+function obj=set_title(obj, title, varargin)
+% set_title Add the specified title to the figure
 %
 % Example syntax: gramm_object.set_title('Title','FontSize',14)
 %
@@ -19,11 +19,11 @@ function obj=set_title(obj,title,varargin)
 % g.set_title('Global title')
 % g.draw()
 
-if numel(obj)>1
-    obj(1).bigtitle=title;
-    obj(1).bigtitle_options=varargin;
-else
-    obj.title=title;
-    obj.title_options=varargin;
-end
+  if (numel (obj) > 1)
+    obj(1).bigtitle = title;
+    obj(1).bigtitle_options = varargin;
+  else
+    obj.title = title;
+    obj.title_options = varargin;
+  end
 end

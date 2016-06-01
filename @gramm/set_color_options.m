@@ -1,4 +1,4 @@
-function obj=set_color_options(obj,varargin)
+function obj=set_color_options(obj, varargin)
 % set_color_options() Set options used to generate colormaps
 %
 % Parameters:
@@ -31,16 +31,23 @@ function obj=set_color_options(obj,varargin)
 % 'chroma': Chroma used when generating plots without chroma
 % variations. Default is 70
 
-p=inputParser;
-my_addParameter(p,'map','lch'); %matlab, brewer1,brewer2,brewer3,brewer_pastel,brewer_dark
-my_addParameter(p,'lightness_range',[85 15]);
-my_addParameter(p,'chroma_range',[30 90]);
-my_addParameter(p,'hue_range',[25 385]);
-my_addParameter(p,'lightness',65);
-my_addParameter(p,'chroma',75);
-parse(p,varargin{:});
+  p = inputParser;
+  my_addParameter (p, 'map', 'lch');
+            %matlab, brewer1,brewer2,brewer3,brewer_pastel,brewer_dark
+  my_addParameter (p, 'lightness_range', [85 15]);
+  my_addParameter (p, 'chroma_range', [30 90]);
+  my_addParameter (p, 'hue_range', [25 385]);
+  my_addParameter (p, 'lightness', 65);
+  my_addParameter (p, 'chroma', 75);
+  parse (p, varargin{:});
 
-for obj_ind=1:numel(obj)
-    obj(obj_ind).color_options=p.Results;
-end
+  if (exist ('OCTAVE_VERSION', 'builtin'))
+    for obj_ind = (1:numel (obj))
+      __set_color_option (obj(obj_ind), p.Results);
+    end
+  else    
+    for obj_ind = (1:numel (obj))
+      obj(obj_ind).color_options = p.Results;
+    end
+  end
 end

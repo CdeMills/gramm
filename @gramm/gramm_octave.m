@@ -6,6 +6,8 @@ classdef gramm < handle
   properties (Access = public)
     facet_axes_handles; %Stores the handles of the facet axes
     results; %Stores the results of the draw functions and statistics computations
+    bigtitle = '';
+    title = '';
   end
   properties (Access = protected, Hidden = true)
     aes; % aesthetics (contains data set by the constructor and used to generate the plots)
@@ -111,9 +113,9 @@ classdef gramm < handle
         legend_axe_handle; % Store the handle of the legend axis
         title_axe_handle; % Store the handle of the title axis
         
-        bigtitle = '';
+        % bigtitle = '';
         bigtitle_options = {};
-        title = '';
+        % title = '';
         title_options = {};
         
         legend_text_handles = []; % Stores handles of text objects for legend
@@ -124,7 +126,7 @@ classdef gramm < handle
         
         parent = [];
         handle_graphics;
-        extra %Store extra geom-specific info
+        extra = struct(); %Store extra geom-specific info
   end
 
   methods (Access = protected)
@@ -162,9 +164,20 @@ classdef gramm < handle
           out.(p.Parameters{pr}) = p.Results.(p.Parameters{pr});
         end
       end
+    end   
+    %# Octave has issues with obj(indi).(some_name) = some_val
+    function obj=__set_name(obj, fnames, vals)
+      for k = (1:length (fnames))
+        obj.aes_names.([fnames{k}]) = vals.(fnames{k});
+      end
     end
+
+    function obj=__set_color_option(obj, vals)
+      obj.color_options = vals;
+    end
+    
   end
-  
+    
   methods (Access = public)
      % Constructor
     function obj=gramm(varargin)
