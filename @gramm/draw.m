@@ -354,7 +354,18 @@ for ind_row = (1:length (uni_row))
               obj.facet_axes_handles(ind_row, ind_column) = mysubplot (length (uni_row), length (uni_column), ind_row, ind_column);
             end
          % And we copy the contents of the first facet in the new ones
-            copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
+            try
+              lasterr('');
+              copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
+            catch my_err
+              if (exist ('OCTAVE_VERSION', 'builtin'))
+                keyboard
+                octave_copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
+              else
+                disp (sprintf ('draw.m: copyobj failed with error %s', lasterr ()));
+                rethrow (my_err);
+              end
+            end
           end
                    % else
                    %In other cases (same facets or multiple to

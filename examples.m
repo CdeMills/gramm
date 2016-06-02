@@ -1,5 +1,17 @@
 %% gramm examples
 % Examples and how-tos for gramm
+
+if (exist ('OCTAVE_VERSION', 'builtin'))
+  if (~exist('GRAMM_OCTAVE_WARNING'))
+    GRAMM_OCTAVE_WARNING = true;
+    disp ('For an optimal experience under Octave:')
+    disp ('1) if not already done, install the statistics package');
+    disp ('   pkg -forge -verbose install statistics');
+    disp ('2) pkg load statistics');
+    disp ('3) use the fltk toolkit: graphics_toolkit (''fltk'')');
+  end
+end
+
 %% Example from the readme
 % Here we plot the evolution of fuel economy of new cars bewteen 1970 and 1980 (carbig
 % dataset). Gramm is used to easily separate groups on the basis of the number of
