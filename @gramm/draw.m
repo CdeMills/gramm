@@ -359,7 +359,6 @@ for ind_row = (1:length (uni_row))
               copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
             catch my_err
               if (exist ('OCTAVE_VERSION', 'builtin'))
-                keyboard
                 octave_copyobj (first_axes_children, obj.facet_axes_handles(ind_row, ind_column));
               else
                 disp (sprintf ('draw.m: copyobj failed with error %s', lasterr ()));
